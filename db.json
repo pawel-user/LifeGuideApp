@@ -1,0 +1,37 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "Pawel",
+      "email": "pawel.bochacik.programista@gmail.com",
+      "password": "secret123",
+      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBhd2VsIiwiaWQiOjEsImlhdCI6MTc0ODg1Mzc4NSwiZXhwIjoxNzQ4ODU3Mzg1fQ.dy7sVi8XBrcUFNEah8gM_x7Q-0pmlJJn5vbxBIY4RKY"
+    }
+  ],
+  "notes": [
+    {
+      "id": 1,
+      "userId": 1,
+      "section": "Blogi o programowaniu",
+      "linkTitle": "Blog P-programowanie",
+      "url": "https://www.p-programowanie.pl/",
+      "description": "Blog z informacjami, poradnikami dla obecnych i przyszłych programistów."
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "section": "Technologie webowe - CSS",
+      "linkTitle": "Lista czcionek",
+      "url": "https://www.cssfontstack.com/",
+      "description": "Strona z listą czcionek, które są w powszechnym użyciu przez webmasterów. "
+    },
+    {
+      "id": 3,
+      "userId": 1,
+      "section": "Technologie webowe - Wordpress",
+      "linkTitle": "Płatne szablony Wordpressa",
+      "url": "https://themeforest.net/category/wordpress",
+      "description": "Strona z płatnymi szablonami witryn w technologii Wordpress."
+    }
+  ]
+}
