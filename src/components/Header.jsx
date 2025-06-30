@@ -1,7 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Logout from "./Logout";
-import HighlightIcon from "@mui/icons-material/Highlight";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHandshake } from '@fortawesome/free-solid-svg-icons';
 
 function Header(props) {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ function Header(props) {
     <header>
       <nav className="navbar">
         <a className="navbar-brand" href="/" onClick={handleReturnToHome}>
-          <HighlightIcon className="icon" />{" "}
-          <span className="brand-text">Web Keeper</span>
+          <FontAwesomeIcon className="icon" icon={faHandshake} />
+          <span className="brand-text">Life Guide</span>
         </a>
         {props.isLoggedIn ? (
           <div className="navbar-right">

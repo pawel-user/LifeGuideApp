@@ -1,13 +1,16 @@
 {
-  "name": "web-keeper",
+  "name": "life-guide",
   "version": "1.0.0",
-  "description": "A modern application to keep web links.",
+  "description": "A modern application to note your life problems and solve its by chatting with AI.",
   "keywords": [],
   "main": "src/index.js",
   "type": "module",
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
     "@mui/icons-material": "^6.4.7",
     "@mui/material": "^6.4.7",
     "axios": "^1.8.1",
