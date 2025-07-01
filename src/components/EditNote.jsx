@@ -11,9 +11,7 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
   
   const [isExpanded, setExpanded] = useState(false);
   const [editedNote, setEditedNote] = useState({
-    section: "",
-    url: "",
-    linkTitle: "",
+    noteTitle: "",
     description: "",
     ...note,
   });
@@ -39,9 +37,7 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
     event.preventDefault();
 
     if (
-      !editedNote.section ||
-      !editedNote.linkTitle ||
-      !editedNote.url ||
+      !editedNote.noteTitle ||
       !editedNote.description
     ) {
       setAlert(
@@ -51,14 +47,14 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
       return;
     }
 
-    const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^\s]*)?$/;
-    if (!urlRegex.test(editedNote.url)) {
-      setAlert(
-        "error",
-        "Edited for invalid the website URL format! Please edit again."
-      );
-      return;
-    }
+    // const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^\s]*)?$/;
+    // if (!urlRegex.test(editedNote.url)) {
+    //   setAlert(
+    //     "error",
+    //     "Edited for invalid the website URL format! Please edit again."
+    //   );
+    //   return;
+    // }
 
     try {
       const response = await editNote(editedNote.id, editedNote);
@@ -89,9 +85,7 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
   const clearInputs = (e) => {
     e.preventDefault();
     setEditedNote({
-      section: "",
-      url: "",
-      linkTitle: "",
+      noteTitle: "",
       description: "",
     });
   };
@@ -101,22 +95,10 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
       <form className="create-note" onSubmit={handleSubmit}>
         <h2>Edit User Note</h2>
         <input
-          name="section"
+          name="noteTitle"
           onChange={handleChange}
-          value={editedNote.section || ""}
-          placeholder="Section"
-        />
-        <input
-          name="url"
-          onChange={handleChange}
-          value={editedNote.url || ""}
-          placeholder="URL website address"
-        />
-        <input
-          name="linkTitle"
-          onChange={handleChange}
-          value={editedNote.linkTitle || ""}
-          placeholder="Title of the website link"
+          value={editedNote.noteTitle || ""}
+          placeholder="Title of the life problem"
         />
         <textarea
           name="description"

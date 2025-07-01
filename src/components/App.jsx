@@ -299,9 +299,7 @@ function App() {
                       <Note
                         key={index}
                         id={index}
-                        section={noteItem.section}
-                        linkTitle={noteItem.linkTitle}
-                        url={noteItem.url}
+                        noteTitle={noteItem.noteTitle}
                         description={noteItem.description}
                         onEdit={editNote}
                         onDelete={deleteNote}

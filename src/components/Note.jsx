@@ -18,21 +18,18 @@ function Note(props) {
     props.setContent("notes");
   }
 
-  const formatUrl = (url) => {
-    if (!/^https?:\/\//i.test(url)) {
-      return `https://${url}`;
-    }
-    return url;
-  };
+  // const formatUrl = (url) => {
+  //   if (!/^https?:\/\//i.test(url)) {
+  //     return `https://${url}`;
+  //   }
+  //   return url;
+  // };
 
-  const url = formatUrl(props.url);
+  // const url = formatUrl(props.url);
 
   return (
     <div className="note">
-      <h1>{props.section}</h1>
-      <a href={url} target="_blank" rel="noopener noreferrer">
-        {props.linkTitle}
-      </a>{" "}
+      <h1>{props.noteTitle}</h1>
       <p>{props.description}</p>
       <Link
         component={Link}

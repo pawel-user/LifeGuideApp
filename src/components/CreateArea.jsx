@@ -8,9 +8,7 @@ import { Fab } from "@mui/material";
 
 function CreateArea(props) {
   const [note, setNote] = useState({
-    section: "",
-    linkTitle: "",
-    url: "",
+    noteTitle: "",
     description: "",
   });
 
@@ -27,7 +25,7 @@ function CreateArea(props) {
 
   async function submitNote(event) {
     event.preventDefault();
-    if (!note.section || !note.linkTitle || !note.url || !note.description) {
+    if (!note.noteTitle || !note.description) {
       props.setAlert(
         "error",
         "Empty fields detected! All input fields are required."
@@ -35,23 +33,21 @@ function CreateArea(props) {
       return;
     }
 
-    const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^\s]*)?$/;
-    if (!urlRegex.test(note.url)) {
-      props.setAlert(
-        "error",
-        "Invalid the website URL format! Please try again."
-      );
-      return;
-    }
+    // const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^\s]*)?$/;
+    // if (!urlRegex.test(note.url)) {
+    //   props.setAlert(
+    //     "error",
+    //     "Invalid the website URL format! Please try again."
+    //   );
+    //   return;
+    // }
 
     try {
       const response = await addNote(note);
       if (response.status === 201) {
         props.onAdd(note);
         setNote({
-          section: "",
-          linkTitle: "",
-          url: "",
+          noteTitle: "",
           description: "",
         });
         props.setExpanded(false);
@@ -87,9 +83,7 @@ function CreateArea(props) {
   function toggleClearAndCancel() {
     props.setExpanded(false);
     setNote({
-      section: "",
-      url: "",
-      linkTitle: "",
+      noteTitle: "",
       description: "",
     });
     props.setAlert("warning", "The action was canceled.");
@@ -98,30 +92,13 @@ function CreateArea(props) {
   return (
     <div className="create-note-area">
       <form className="create-note">
+        
         {props.isExpanded ? (
           <input
-            name="section"
+            name="noteTitle"
             onChange={handleChange}
-            value={note.section}
-            placeholder="Section"
-          />
-        ) : null}
-
-        {props.isExpanded ? (
-          <input
-            name="url"
-            onChange={handleChange}
-            value={note.url}
-            placeholder="URL website address"
-          />
-        ) : null}
-
-        {props.isExpanded ? (
-          <input
-            name="linkTitle"
-            onChange={handleChange}
-            value={note.linkTitle}
-            placeholder="Title of the website link"
+            value={note.noteTitle}
+            placeholder="Title of the life problem"
           />
         ) : null}
 

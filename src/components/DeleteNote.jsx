@@ -39,19 +39,10 @@ function DeleteNote({ note, onRemove, setAlert, cancelAction }) {
       <form className="create-note" onSubmit={handleSubmit}>
         <h2>Delete User Note</h2>
         <p className="form-question">Are you sure to delete this note?</p>
-
         <div className="note-details">
           <div className="note-field">
-            <label>Section:</label>
-            <span>{deletedNote.section || "No data"}</span>
-          </div>
-          <div className="note-field">
-            <label>Address URL:</label>
-            <span>{deletedNote.url || "No data"}</span>
-          </div>
-          <div className="note-field">
-            <label>Link Title:</label>
-            <span>{deletedNote.linkTitle || "No data"}</span>
+            <label>Note Title:</label>
+            <span>{deletedNote.noteTitle || "No data"}</span>
           </div>
           <div className="note-field">
             <label>Description:</label>

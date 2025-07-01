@@ -183,19 +183,19 @@ app.post("/add/note", authenticateUser, (req, res) => {
   try {
     const uploadedNote = req.body;
 
-    const userNotes = req.db.notes.filter(
-      (note) => note.userId === req.user.id
-    );
+    // const userNotes = req.db.notes.filter(
+    //   (note) => note.userId === req.user.id
+    // );
 
-    const noteUrlExists = userNotes.find(
-      (noteItem) => noteItem.url === uploadedNote.url
-    );
+    // const noteUrlExists = userNotes.find(
+    //   (noteItem) => noteItem.url === uploadedNote.url
+    // );
 
-    if (noteUrlExists) {
-      return res
-        .status(400)
-        .json({ message: "Note with the website URL already exists" });
-    }
+    // if (noteUrlExists) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "Note with the website URL already exists" });
+    // }
 
     const newId =
       req.db.notes.length > 0
@@ -205,9 +205,7 @@ app.post("/add/note", authenticateUser, (req, res) => {
     const newNote = {
       id: newId,
       userId: req.user.id,
-      section: uploadedNote.section,
-      linkTitle: uploadedNote.linkTitle,
-      url: uploadedNote.url,
+      noteTitle: uploadedNote.noteTitle,
       description: uploadedNote.description,
     };
     req.db.notes.push(newNote);
@@ -239,9 +237,7 @@ app.patch("/notes/:id", authenticateUser, (req, res) => {
     return res.status(404).send("Note not found.");
   }
 
-  if (req.body.section) notesData[noteIndex].section = req.body.section;
-  if (req.body.linkTitle) notesData[noteIndex].linkTitle = req.body.linkTitle;
-  if (req.body.url) notesData[noteIndex].url = req.body.url;
+  if (req.body.noteTitle) notesData[noteIndex].noteTitle = req.body.noteTitle;
   if (req.body.description)
     notesData[noteIndex].description = req.body.description;
 
