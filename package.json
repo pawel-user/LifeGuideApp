@@ -1,47 +1,13 @@
 {
-  "name": "life-guide",
-  "version": "1.0.0",
-  "description": "A modern application to note your life problems and solve them by chatting with AI.",
-  "main": "src/index.js",
-  "type": "module",
-  "scripts": {
-    "start": "react-scripts start",
-    "server": "nodemon server.js",
-    "build": "react-scripts build",
-    "test": "react-scripts test --env=jsdom",
-    "eject": "react-scripts eject"
-  },
-  "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@fortawesome/fontawesome-svg-core": "^6.7.2",
-    "@fortawesome/free-solid-svg-icons": "^6.7.2",
-    "@fortawesome/react-fontawesome": "^0.2.2",
-    "@mui/icons-material": "^6.4.7",
-    "@mui/material": "^6.4.7",
-    "axios": "^1.8.1",
-    "bcrypt": "^6.0.0",
-    "body-parser": "^1.20.3",
-    "dotenv": "^16.4.7",
-    "express": "^4.21.2",
-    "jsonwebtoken": "^9.0.2",
-    "jwt-decode": "^4.0.0",
-    "pg": "^8.16.3",
-    "prop-types": "^15.8.1",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^7.2.0",
-    "react-scripts": "^5.0.1",
-    "uuid": "^11.1.0"
-  },
-  "devDependencies": {
-    "cors": "^2.8.5",
-    "nodemon": "^3.0.2"
-  },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+    "name": "life-guide-root",
+    "version": "1.0.0",
+    "description": "Root config to orchestrate frontend and backend for Life Guide App",
+    "private": true,
+    "scripts": {
+        "dev": "concurrently \"npm --prefix client start\" \"npm --prefix server run dev\"",
+        "install-all": "npm --prefix client install && npm --prefix server install"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.2"
+    }
 }
