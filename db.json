@@ -1,19 +1,4 @@
 {
-  "users": [
-    {
-      "id": 1,
-      "username": "Pawel",
-      "email": "rik1986@o2.pl",
-      "password": "123",
-      "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlBhd2VsIiwiaWQiOjEsImlhdCI6MTc1MTMxNTExNSwiZXhwIjoxNzUxMzE4NzE1fQ.aj88DIrz0S7s5EalX8qQZgTS5aonPpnEMhjIKM9hdf4"
-    }
-  ],
-  "notes": [
-    {
-      "id": 1,
-      "userId": 1,
-      "noteTitle": "Math problem",
-      "description": "I have a problem with one mathematical task."
-    }
-  ]
+  "users": [],
+  "notes": []
 }

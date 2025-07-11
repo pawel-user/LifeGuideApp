@@ -1,9 +1,16 @@
+// components/Logout.jsx
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../services/loggedUsers.js";
 import LogoutIcon from "@mui/icons-material/Logout";
 
-export default function Logout(props) {
+export default function Logout({
+  setLogin,
+  setToken,
+  setAlert,
+  setContent,
+  setNotes
+}) {
   const navigate = useNavigate();
 
   const handleLogout = async (e) => {
@@ -14,29 +21,31 @@ export default function Logout(props) {
         console.log("No token, user is already logged out.");
         return;
       }
+
       await logoutUser(token);
-      props.setLogin(false);
-      props.setToken("");
-      props.setIsEditing(false);
-      props.setNoteToEdit(null);
-      props.setAlert("success", "Logout successful");
-      props.setContent("start");
-      props.setNotes([]);
+
+      setLogin(false);
+      setToken("");
+      setNotes([]);
+      setAlert("success", "Logout successful");
+      setContent("start");
+
+      // 💾 Wyczyść pamięć
       localStorage.removeItem("notes");
       localStorage.removeItem("token");
       localStorage.removeItem("userData");
       sessionStorage.clear();
-      navigate("/");      
+
+      navigate("/");
     } catch (error) {
       console.error("Error during logout:", error);
-      props.setAlert("error", "Logout failed. Please try again.");
+      setAlert("error", "Logout failed. Please try again.");
     }
   };
 
   return (
     <h2>
       <button
-        variant="contained"
         onClick={handleLogout}
         className="logout-button"
       >

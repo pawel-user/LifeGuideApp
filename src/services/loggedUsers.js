@@ -10,7 +10,7 @@ export async function loginUser(credentials, setAlert) {
         credentials,
         { headers: { "Content-Type": "application/json" } }
       );
-      return response.data;
+      return response.data.token;
     } catch (error) {
       console.error("Error logging in:", error);
       if (error.response && error.response.status === 400) {
@@ -42,7 +42,7 @@ export async function loginUser(credentials, setAlert) {
           },
         }
       );
-      return response.data;
+      return response.data.token;
     } catch (error) {
       console.error("Error while logging out:", error);
       throw error;

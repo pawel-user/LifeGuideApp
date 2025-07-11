@@ -1,22 +1,27 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Logout from "./Logout";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHandshake } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faHandshake } from "@fortawesome/free-solid-svg-icons";
 
-function Header(props) {
+function Header({
+  isLoggedIn,
+  logout,
+  setToken,
+  setLogin,
+  setAlert,
+  setContent,
+  setNoteToEdit,
+  setNotes,
+  setIsDeleting
+}) {
   const navigate = useNavigate();
 
   const handleReturnToHome = (e) => {
     e.preventDefault();
-    if (props.isLoggedIn) {
-      props.setContent("home");
-    } else {
-      props.setContent("start");
-    }
-    props.setIsEditing(false);
-    props.setIsDeleting(false);
-    props.setExpanded(false);
+    setContent(isLoggedIn ? "home" : "start");
+    setNoteToEdit(null);      // czyści notatkę do edycji
+    setIsDeleting(false);     // czyści stan usuwania
     navigate("/");
   };
 
@@ -27,20 +32,19 @@ function Header(props) {
           <FontAwesomeIcon className="icon" icon={faHandshake} />
           <span className="brand-text">Life Guide</span>
         </a>
-        {props.isLoggedIn ? (
+        {isLoggedIn && (
           <div className="navbar-right">
             <Logout
-              setLogin={props.setLogin}
-              setToken={props.setToken}
-              setAlert={props.setAlert}
-              setContent={props.setContent}
-              setIsEditing={props.setIsEditing}
-              setNoteToEdit={props.setIsEditing}
-              setIsDeleting={props.setIsDeleting}
-              setNotes={props.setNotes}
+              setLogin={setLogin}
+              setToken={setToken}
+              setAlert={setAlert}
+              setContent={setContent}
+              setNotes={setNotes}
+              setNoteToEdit={setNoteToEdit}
+              setIsDeleting={setIsDeleting}
             />
           </div>
-        ) : null}
+        )}
       </nav>
     </header>
   );
