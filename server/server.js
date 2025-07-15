@@ -133,8 +133,9 @@ app.get("/user/notes", authenticateUser, async (req, res) => {
   }
 });
 
-app.get("/add/notes", authenticateUser, async (req, res) => {
+app.post("/add/notes", authenticateUser, async (req, res) => {
   const { noteTitle, description } = req.body;
+  const userID = req.user.id;
 
   if (!noteTitle || !description) {
     return res.status(400).send("All fields are required");
@@ -142,17 +143,71 @@ app.get("/add/notes", authenticateUser, async (req, res) => {
 
   try {
     const result = await pool.query(
-      "INSERT INTO notes (noteTitle, description) VALUES ($1, $2) RETURNING id",
-      [noteTitle, description]
+      "INSERT INTO notes (userid, notetitle, description) VALUES ($1, $2, $3) RETURNING id",
+      [userID, noteTitle, description]
     );
 
     console.log("New note added successfully!");
-    return res.status(201).send("Adding new note was successful.");
+    res.status(201).json(result.rows[0]);
+    // return res.status(201).send("Adding new note was successful.");
   } catch (error) {
     console.error("Error during adding new user note:", error);
     res.status(500).send("Internal Server Error");
   }
 });
+
+app.patch("/notes/:id", authenticateUser, async (req, res) => {
+  const noteId = parseInt(req.params.id, 10);
+  const { noteTitle, description } = req.body;
+  const userId = req.user.id;
+
+  if (!noteTitle || !description) {
+    return res.status(400).send("All fields are required");
+  }
+
+  try {
+    const result = await pool.query(
+      `UPDATE notes
+       SET notetitle = $1, description = $2
+       WHERE id = $3 AND userid = $4
+       RETURNING *`,
+      [noteTitle, description, noteId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Note not found or you don't have permission to edit it");
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (error) {
+    console.error("Error updating note:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.delete("/notes/:id", authenticateUser, async (req, res) => {
+  const noteId = parseInt(req.params.id, 10);
+  const userId = req.user.id;
+
+  try {
+    const result = await pool.query(
+      `DELETE FROM notes
+       WHERE id = $1 AND userid = $2
+       RETURNING *`,
+      [noteId, userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).send("Note not found or you don't have permission to delete it");
+    }
+
+    res.status(200).json({ message: "Note deleted", deletedNote: result.rows[0] });
+  } catch (error) {
+    console.error("Error deleting note:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 
 // app.get("/users", (req, res) => {
 //   res.send(req.db.users);
@@ -176,97 +231,6 @@ app.get("/add/notes", authenticateUser, async (req, res) => {
 //     res.status(400).send("Invalid token.");
 //   }
 // };
-
-// app.post("/add/note", authenticateUser, (req, res) => {
-//   try {
-//     const uploadedNote = req.body;
-
-//     const newId =
-//       req.db.notes.length > 0
-//         ? req.db.notes.reduce((maxId, note) => Math.max(maxId, note.id), 0) + 1
-//         : 1;
-
-//     const newNote = {
-//       id: newId,
-//       userId: req.user.id,
-//       noteTitle: uploadedNote.noteTitle,
-//       description: uploadedNote.description,
-//     };
-//     req.db.notes.push(newNote);
-
-//     fs.writeFile(
-//       dbPath,
-//       JSON.stringify({ users: req.db.users, notes: req.db.notes }, null, 2),
-//       (err) => {
-//         if (err) {
-//           console.error("Error writing to db.json:", err);
-//           return res.status(500).send("Internal Server Error");
-//         } else {
-//           console.log("New note added successfully!");
-//           return res.status(201).send("Adding new note was successful.");
-//         }
-//       }
-//     );
-//   } catch (error) {
-//     console.error("Error in /add/note route:", error);
-//     return res.status(500).send("Internal Server Error");
-//   }
-// });
-
-// app.patch("/notes/:id", authenticateUser, (req, res) => {
-//   const noteId = parseInt(req.params.id);
-//   const noteIndex = notesData.findIndex((note) => note.id === noteId);
-
-//   if (noteIndex === -1) {
-//     return res.status(404).send("Note not found.");
-//   }
-
-//   if (req.body.noteTitle) notesData[noteIndex].noteTitle = req.body.noteTitle;
-//   if (req.body.description)
-//     notesData[noteIndex].description = req.body.description;
-
-//   const updatedData = {
-//     users: usersData,
-//     notes: notesData,
-//   };
-
-//   fs.writeFile(dbPath, JSON.stringify(updatedData, null, 2), (err) => {
-//     if (err) {
-//       console.error("Error writing to db.json:", err);
-//       return res.status(500).send("Internal Server Error");
-//     }
-//     console.log("Data successfully written to db.json");
-//     setTimeout(() => {
-//       res.json(notesData[noteIndex]);
-//     }, 100);
-//   });
-// });
-
-// app.delete("/notes/:id", authenticateUser, (req, res) => {
-//   const noteIndex = notesData.findIndex(
-//     (p) => p.id === parseInt(req.params.id)
-//   );
-//   if (noteIndex === -1)
-//     return res.status(404).json({ message: "Note not found" });
-
-//   notesData.splice(noteIndex, 1);
-
-//   const updatedData = {
-//     users: usersData,
-//     notes: notesData,
-//   };
-
-//   fs.writeFile(dbPath, JSON.stringify(updatedData, null, 2), (err) => {
-//     if (err) {
-//       console.error("Error writing to db.json:", err);
-//       return res.status(500).send("Internal Server Error");
-//     }
-//     console.log("Data successfully written to db.json");
-//     setTimeout(() => {
-//       res.json({ message: "Post deleted" });
-//     }, 100);
-//   });
-// });
 
 app.post("/logout", (req, res) => {
   console.log("User logged out successfully.");

@@ -1,19 +1,16 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Zoom, Fab } from "@mui/material";
 import { editNote } from "../services/userNotes.js";
 import EditIcon from "@mui/icons-material/Edit";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import CloseIcon from "@mui/icons-material/Close";
 
-function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDeleting}) {
-  const navigate = useNavigate();
-  
+function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
   const [isExpanded, setExpanded] = useState(false);
   const [editedNote, setEditedNote] = useState({
-    noteTitle: "",
-    description: "",
-    ...note,
+    notetitle: note.notetitle || "",
+    description: note.description || "",
+    id: note.id,
   });
 
   function handleChange(event) {
@@ -24,91 +21,75 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
     }));
   }
 
-  function handleCancel(event) {
-    event.preventDefault();
-    setAlert("warning", "Action was canceled.");
-    setContent("home");
-    setIsEditing(false);
-    setIsDeleting(false);
-    navigate("/");
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (
-      !editedNote.noteTitle ||
-      !editedNote.description
-    ) {
-      setAlert(
-        "error",
-        "Empty fields detected! You need complete all input fields."
-      );
+    if (!editedNote.notetitle || !editedNote.description) {
+      setAlert("error", "You need to fill out all fields before saving.");
       return;
     }
 
-    // const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^\s]*)?$/;
-    // if (!urlRegex.test(editedNote.url)) {
-    //   setAlert(
-    //     "error",
-    //     "Edited for invalid the website URL format! Please edit again."
-    //   );
-    //   return;
-    // }
-
     try {
       const response = await editNote(editedNote.id, editedNote);
-      if (response.status === 404) {
-        setAlert("error", "Note not found!");
+
+      if (response?.status === 404) {
+        setAlert("error", "Note not found.");
         return;
       }
-      if (response.status === 400) {
-        setAlert("error", "Note with the website URL already exists.");
+
+      if (response?.status === 400) {
+        setAlert("error", "Duplicate note or invalid format.");
         return;
       }
+
       if (response) {
         onUpdate(editedNote);
-        setAlert(
-          "success",
-          `Note with id  ${editedNote.id} was edited succesfully`
-        );
+        setAlert("success", "Note updated successfully.");
       }
     } catch (error) {
-      console.error("Error while editing user note:", error);
+      console.error("Error editing note:", error);
+      setAlert("error", "Update failed. Please try again.");
     }
+  }
+
+  function handleCancel(event) {
+    event.preventDefault();
+    setAlert("info", "Editing canceled.");
+    setContent("home");
+    cancelAction(); // korzysta z useNoteActions
   }
 
   function toggle(isExpanded) {
     setExpanded(!isExpanded);
   }
 
-  const clearInputs = (e) => {
-    e.preventDefault();
+  function clearInputs(event) {
+    event.preventDefault();
     setEditedNote({
-      noteTitle: "",
+      notetitle: "",
       description: "",
+      id: note.id,
     });
-  };
+  }
 
   return (
     <div className="edit-container">
       <form className="create-note" onSubmit={handleSubmit}>
         <h2>Edit User Note</h2>
         <input
-          name="noteTitle"
+          name="notetitle"
           onChange={handleChange}
-          value={editedNote.noteTitle || ""}
+          value={editedNote.notetitle}
           placeholder="Title of the life problem"
         />
         <textarea
           name="description"
           onClick={() => toggle(isExpanded)}
           onChange={handleChange}
-          value={editedNote.description || ""}
+          value={editedNote.description}
           placeholder="Take a note..."
           rows={isExpanded ? 6 : 1}
         />
-
         <div className="fab-buttons-container">
           <Zoom in={true}>
             <Fab
@@ -135,7 +116,7 @@ function EditNote({ note, onUpdate, setAlert, setContent, setIsEditing, setIsDel
               className="fab-cancel-button"
               onClick={handleCancel}
               color="primary"
-              aria-label="clear"
+              aria-label="cancel"
             >
               <CloseIcon />
             </Fab>

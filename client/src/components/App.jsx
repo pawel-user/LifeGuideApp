@@ -112,6 +112,7 @@ function App() {
                   }}
                   setAlert={showAlert}
                   setContent={handleContent}
+                  cancelAction={cancelAction}
                 />
               ) : editingStates.type === "delete" ? (
                 <DeleteNote
@@ -134,7 +135,7 @@ function App() {
                       <Note
                         key={index}
                         id={index}
-                        noteTitle={noteItem.noteTitle}
+                        noteTitle={noteItem.notetitle}
                         description={noteItem.description}
                         onEdit={editNote}
                         onDelete={deleteNote}

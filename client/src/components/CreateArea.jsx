@@ -44,8 +44,8 @@ function CreateArea(props) {
 
     try {
       const response = await addNote(note);
-      if (response.status === 201) {
-        props.onAdd(note);
+      if (response.status === 201 && response.data) {
+        props.onAdd(response.data);
         setNote({
           noteTitle: "",
           description: "",

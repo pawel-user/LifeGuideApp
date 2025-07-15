@@ -21,7 +21,7 @@ export async function getNotes(token) {
 export async function addNote(newNote) {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.post(API_URL + "/add/note", newNote, {
+    const response = await axios.post(API_URL + "/add/notes", newNote, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
