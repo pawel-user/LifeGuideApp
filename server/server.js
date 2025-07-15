@@ -1,19 +1,18 @@
 import express from "express";
-import bodyParser from "body-parser";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import pg from "pg";
 import bcrypt from "bcrypt";
+import { authenticateUser } from "../server/middleware/authenticate.js";
 
 dotenv.config();
 
 const app = express();
 const port = 8080;
-export const API_URL =
-  process.env.REACT_APP_API_URL || `http://localhost:${port}`;
+const API_URL = process.env.REACT_APP_API_URL || `http://localhost:${port}`;
 const SECRET_KEY = process.env.SECRET_KEY;
-const SALT_ROUNDS = 10;
+const SALT_ROUNDS = parseInt(process.env.SALT_ROUNDS, 10);
 
 const { Pool } = pg;
 const pool = new Pool({
@@ -25,24 +24,8 @@ const pool = new Pool({
 });
 
 // Middleware
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
-
-const authenticateUser = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).send("No token provided");
-
-  try {
-    const decoded = jwt.verify(token, SECRET_KEY);
-    req.user = decoded;
-    next();
-  } catch (err) {
-    console.error("Token error:", err);
-    res.status(401).send("Invalid or expired token");
-  }
-};
 
 app.post("/register", async (req, res) => {
   const { username, email, password, repeatedPassword } = req.body;
@@ -108,12 +91,19 @@ app.post("/login", async (req, res) => {
       return res.status(401).send("Invalid credentials.");
     }
 
-    // Generujemy token na podstawie danych logowania
     const token = jwt.sign({ username, id: user.id }, SECRET_KEY, {
-      expiresIn: "1h",
+      expiresIn: "15m",
+    });
+    const refreshToken = jwt.sign({ id: user.id }, SECRET_KEY, {
+      expiresIn: "7d",
     });
 
-    res.send({ token });
+    await pool.query("UPDATE users SET refresh_token = $1 WHERE id = $2", [
+      refreshToken,
+      user.id,
+    ]);
+
+    res.send({ token, refreshToken });
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).send("Internal Server Error");
@@ -147,9 +137,7 @@ app.post("/add/notes", authenticateUser, async (req, res) => {
       [userID, noteTitle, description]
     );
 
-    console.log("New note added successfully!");
     res.status(201).json(result.rows[0]);
-    // return res.status(201).send("Adding new note was successful.");
   } catch (error) {
     console.error("Error during adding new user note:", error);
     res.status(500).send("Internal Server Error");
@@ -175,7 +163,9 @@ app.patch("/notes/:id", authenticateUser, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).send("Note not found or you don't have permission to edit it");
+      return res
+        .status(404)
+        .send("Note not found or you don't have permission to edit it");
     }
 
     res.status(200).json(result.rows[0]);
@@ -198,43 +188,60 @@ app.delete("/notes/:id", authenticateUser, async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).send("Note not found or you don't have permission to delete it");
+      return res
+        .status(404)
+        .send("Note not found or you don't have permission to delete it");
     }
 
-    res.status(200).json({ message: "Note deleted", deletedNote: result.rows[0] });
+    res
+      .status(200)
+      .json({ message: "Note deleted", deletedNote: result.rows[0] });
   } catch (error) {
     console.error("Error deleting note:", error);
     res.status(500).send("Internal Server Error");
   }
 });
 
+app.post("/token", async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) return res.status(401).send("No token provided");
 
-// app.get("/users", (req, res) => {
-//   res.send(req.db.users);
-// });
+  try {
+    const decoded = jwt.verify(refreshToken, SECRET_KEY);
+    const userId = decoded.id;
 
-// const authenticateUser = (req, res, next) => {
-//   const token = req.headers.authorization?.split(" ")[1];
-//   if (!token) {
-//     return res.status(401).send("Access denied. No token provided.");
-//   }
-//   try {
-//     const decoded = jwt.verify(token, SECRET_KEY);
-//     req.user = decoded;
-//     next();
-//   } catch (error) {
-//     console.error("Error verifying token:", error);
-//     if (error.name === "TokenExpiredError") {
-//       return res.status(401).send("Token expired. Please log in again.");
-//     }
-//     console.log("Invalid token.");
-//     res.status(400).send("Invalid token.");
-//   }
-// };
+    const result = await pool.query(
+      "SELECT * FROM users WHERE id = $1 AND refresh_token = $2",
+      [userId, refreshToken]
+    );
 
-app.post("/logout", (req, res) => {
-  console.log("User logged out successfully.");
-  res.status(200).send({ message: "User logged out successfully." });
+    if (result.rows.length === 0) {
+      return res.status(403).send("Invalid refresh token");
+    }
+
+    const token = jwt.sign(
+      { username: result.rows[0].username, id: userId },
+      SECRET_KEY,
+      {
+        expiresIn: "15m",
+      }
+    );
+
+    res.send({ token });
+  } catch (error) {
+    console.error("Error refreshing token:", error);
+    res.status(403).send("Invalid or expired refresh token");
+  }
+});
+
+app.post("/logout", authenticateUser, async (req, res) => {
+  try {
+    await pool.query("UPDATE users SET refresh_token = NULL WHERE id = $1", [req.user.id]);
+    res.status(200).send({ message: "User logged out successfully." });
+  } catch (error) {
+    console.error("Logout error:", error);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.listen(port, () => console.log(`API is running on ${API_URL}`));

@@ -16,14 +16,26 @@ import useContent from "../hooks/useContent";
 import useNoteActions from "../hooks/useNoteActions";
 
 function App() {
-  const { token, setToken, isLoggedIn, setLogin, logout } = useAuth();
+  const {
+    token,
+    setToken,
+    login,
+    logout,
+    isLoggedIn,
+    setLogin,
+    getValidToken,
+  } = useAuth();
+
   const { alert, showAlert } = useAlerts();
   const { type: contentType, handleContent } = useContent();
-  const [notes, setNotes] = useNotes(token, setToken, setLogin);
+
+  const [notes, setNotes] = useNotes(token, isLoggedIn, getValidToken, logout);
+
   const [editingStates, setEditingStates] = React.useState({
     type: null,
     note: null,
   });
+
   const [isExpanded, setExpanded] = React.useState();
 
   const {
@@ -50,9 +62,7 @@ function App() {
           setLogin={setLogin}
           setAlert={showAlert}
           setContent={handleContent}
-          setNoteToEdit={(note) =>
-            setEditingStates({ type: "edit", note })
-          }
+          setNoteToEdit={(note) => setEditingStates({ type: "edit", note })}
           setNotes={setNotes}
           setIsDeleting={(flag) =>
             setEditingStates((prev) => ({
@@ -85,7 +95,7 @@ function App() {
                   path="/login"
                   element={
                     <Login
-                      setToken={setToken}
+                      setToken={setToken} // → to teraz funkcja login
                       setLogin={setLogin}
                       setContent={handleContent}
                       setAlert={showAlert}

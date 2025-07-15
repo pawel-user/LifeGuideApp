@@ -1,31 +1,51 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/loggedUsers.js";
-import propTypes from "prop-types";
+import axios from "axios";
+import PropTypes from "prop-types";
 
-export default function Login({ setToken, setLogin, setAlert, setContent }) {
-  const [username, setUserName] = useState();
-  const [password, setPassword] = useState();
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
+
+export default function Login({ setToken, setAlert, setContent }) {
+  const [username, setUserName] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const token = await loginUser(
-        {
-          username,
-          password,
-        },
+      const { token, refreshToken } = await loginUser(
+        { username, password },
         setAlert
       );
-      setToken(token);
-      setLogin(true);
-      setAlert("success", "Login Successful");
-      setContent("home");
-      navigate("/");
+
+      if (token && refreshToken) {
+        setToken(token, refreshToken); // zapisz token tylko jeśli oba istnieją
+
+        // alternatywny sposób: pobierz notatki od razu po logowaniu
+        const response = await axios.get(`${API_URL}/user/notes`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (response.status === 200) {
+          console.log("User notes:", response.data);
+          // jeśli chcesz, możesz dodać tutaj setNotes(response.data);
+        } else {
+          setAlert("warning", "No notes found for user.");
+        }
+
+        setAlert("success", "Login Successful");
+        setContent("home");
+        navigate("/");
+      } else {
+        setAlert("error", "Login failed: missing token(s)");
+      }
     } catch (error) {
+      // błąd obsłużony już w loginUser()
     }
-    return true;
   };
 
   const handleCancel = () => {
@@ -44,8 +64,10 @@ export default function Login({ setToken, setLogin, setAlert, setContent }) {
             <input
               type="text"
               className="form-control"
-              onChange={(event) => setUserName(event.target.value)}
+              value={username}
+              onChange={(e) => setUserName(e.target.value)}
               autoComplete="username"
+              required
             />
           </label>
         </div>
@@ -55,8 +77,10 @@ export default function Login({ setToken, setLogin, setAlert, setContent }) {
             <input
               type="password"
               className="form-control"
-              onChange={(event) => setPassword(event.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
+              required
             />
           </label>
         </div>
@@ -78,7 +102,7 @@ export default function Login({ setToken, setLogin, setAlert, setContent }) {
 }
 
 Login.propTypes = {
-  setToken: propTypes.func.isRequired,
-  setLogin: propTypes.func.isRequired,
-  setAlert: propTypes.func.isRequired,
+  setToken: PropTypes.func.isRequired,
+  setAlert: PropTypes.func.isRequired,
+  setContent: PropTypes.func.isRequired,
 };
