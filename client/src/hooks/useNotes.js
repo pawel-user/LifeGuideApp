@@ -26,7 +26,13 @@ export default function useNotes(token, isLoggedIn, getValidToken, logout) {
         });
 
         if (response.status === 200) {
-          setNotes(response.data || []);
+          const transformed = response.data.map((note) => ({
+            id: note.id,
+            noteTitle: note.notetitle,
+            description: note.description,
+          }));
+
+          setNotes(transformed);
         } else {
           setNotes([]);
           logout();

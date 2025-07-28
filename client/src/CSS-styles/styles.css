@@ -23,9 +23,17 @@ body {
   min-height: 200vh;
 }
 
+.content {
+  /* margin-top: 260px; */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding-bottom: 100px; /* zapas na footer */
+}
+
 .content-home {
   flex: 1;
-  margin-top: 300px; 
+  margin-top: 120px; 
 }
 
 .content-notes, .content-start {
@@ -100,7 +108,8 @@ footer p {
   padding: 10px;
   width: 240px;
   margin: 16px;
-  float: left;
+  flex-shrink: 0;
+  /* float: left; */
 }
 
 .note h1 {
@@ -125,6 +134,16 @@ footer p {
   height: 36px;
   cursor: pointer;
   outline: none;
+}
+
+/* Kontener na notatki */
+.notes-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--layout-margin, 140px);
+  transition: margin-top 0.3s ease-in-out;
 }
 
 form.create-note {
@@ -215,7 +234,7 @@ form p.form-question {
 
 .create-note-area {
   position: fixed;
-  top: 100px;
+  top: 110px;
   left: 0;
   width: 100%;
   background: #eee;
@@ -223,7 +242,34 @@ form p.form-question {
   z-index: 1000;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
   padding: 16px;
+  min-height: 180px;
 }
+
+/* .create-note-area.sticky {
+  position: fixed;
+  top: 110px;
+  width: 100%;
+  background: #eee;
+  background-image: url("https://www.transparenttextures.com/patterns/cubes.png");
+  z-index: 1000;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+  padding: 16px;
+} */
+
+/* @media (max-width: 480px) {
+  .create-note-area.fixed,
+  .create-note-area.sticky {
+    top: 70px;
+  }
+} */
+
+.scrollable-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  margin-top: 500px; /* 👈 dopasuj do wysokości create-note-area */
+}
+
 
 /* Stylizacja przycisków */
 .button-group {

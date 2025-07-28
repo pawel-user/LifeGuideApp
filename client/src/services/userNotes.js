@@ -10,7 +10,14 @@ export async function getNotes(token) {
         Authorization: `Bearer ${token}`,
       },
     });
-    const result = response.data;
+
+    // 🛠️ Naprawa struktury – zmieniamy notetitle → noteTitle
+    const result = response.data.map((note) => ({
+      id: note.id,
+      noteTitle: note.notetitle,       // 👈 to jest kluczowe!
+      description: note.description,
+    }));
+
     return result || [];
   } catch (error) {
     console.error("Failed to make request:", error.message);
@@ -27,7 +34,7 @@ export async function addNote(newNote) {
         Authorization: `Bearer ${token}`,
       },
     });
-    return response;
+    return response.data;
   } catch (error) {
     console.error("Adding new note error: ", error);
     throw error;

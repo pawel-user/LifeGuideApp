@@ -21,9 +21,8 @@ export default function Login({ setToken, setAlert, setContent }) {
       );
 
       if (token && refreshToken) {
-        setToken(token, refreshToken); // zapisz token tylko jeśli oba istnieją
+        setToken(token, refreshToken);
 
-        // alternatywny sposób: pobierz notatki od razu po logowaniu
         const response = await axios.get(`${API_URL}/user/notes`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -31,7 +30,8 @@ export default function Login({ setToken, setAlert, setContent }) {
         });
 
         if (response.status === 200) {
-          console.log("User notes:", response.data);
+          setNotes(response.data);
+          // console.log("User notes:", response.data);
           // jeśli chcesz, możesz dodać tutaj setNotes(response.data);
         } else {
           setAlert("warning", "No notes found for user.");

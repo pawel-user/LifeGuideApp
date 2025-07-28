@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { addNote } from "../services/userNotes.js";
 import AddIcon from "@mui/icons-material/Add";
 import WrapTextIcon from "@mui/icons-material/WrapText";
 import CloseIcon from "@mui/icons-material/Close";
-import { Zoom } from "@mui/material";
-import { Fab } from "@mui/material";
+import { Zoom, Fab } from "@mui/material";
+import useLayoutMargin from "../hooks/useLayoutMargin";
 
 function CreateArea(props) {
   const [note, setNote] = useState({
@@ -12,19 +12,20 @@ function CreateArea(props) {
     description: "",
   });
 
+  useLayoutMargin(props.isExpanded); // 🚀 Nowy hook zamiast adjustLayoutMargin
+
   function handleChange(event) {
     const { name, value } = event.target;
 
-    setNote((prevNote) => {
-      return {
-        ...prevNote,
-        [name]: value,
-      };
-    });
+    setNote((prevNote) => ({
+      ...prevNote,
+      [name]: value,
+    }));
   }
 
   async function submitNote(event) {
     event.preventDefault();
+
     if (!note.noteTitle || !note.description) {
       props.setAlert(
         "error",
@@ -33,27 +34,29 @@ function CreateArea(props) {
       return;
     }
 
-    // const urlRegex = /^(https?:\/\/)?([a-zA-Z0-9.-]+)(:[0-9]+)?(\/[^\s]*)?$/;
-    // if (!urlRegex.test(note.url)) {
-    //   props.setAlert(
-    //     "error",
-    //     "Invalid the website URL format! Please try again."
-    //   );
-    //   return;
-    // }
-
     try {
       const response = await addNote(note);
-      if (response.status === 201 && response.data) {
-        props.onAdd(response.data);
-        setNote({
-          noteTitle: "",
-          description: "",
-        });
+
+      console.log("✅ Dodano notatkę:", response);
+
+      if (response && response.id) {
+        const newNote = {
+          id: response.id,
+          noteTitle: note.noteTitle,
+          description: note.description,
+        };
+
+        props.onAdd(newNote);
+
+        setNote({ noteTitle: "", description: "" });
         props.setExpanded(false);
+        props.setAlert("success", "New note added successfully!");
+      } else {
+        props.setAlert("warning", "Note added, but response is incomplete.");
       }
     } catch (error) {
-      console.error("Error while adding new user note:", error);
+      console.error("❌ Error while adding new user note:", error);
+
       if (
         error.response &&
         error.response.status === 400 &&
@@ -90,21 +93,20 @@ function CreateArea(props) {
   }
 
   return (
-    <div className="create-note-area">
+    <div className={`create-note-area`}>
       <form className="create-note">
-        
-        {props.isExpanded ? (
+        {props.isExpanded && (
           <input
             name="noteTitle"
             onChange={handleChange}
             value={note.noteTitle}
             placeholder="Title of the life problem"
           />
-        ) : null}
+        )}
 
         <textarea
           name="description"
-          onClick={() => expand()}
+          onClick={expand}
           onChange={handleChange}
           value={note.description}
           placeholder="Take a note..."
@@ -117,7 +119,7 @@ function CreateArea(props) {
             </Fab>
           </Zoom>
           <Zoom in={props.isExpanded}>
-            <Fab onClick={() => toggle(props.isExpanded)}>
+            <Fab onClick={toggle}>
               <WrapTextIcon />
             </Fab>
           </Zoom>

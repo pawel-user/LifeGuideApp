@@ -2,20 +2,37 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import DeleteIcon from "@mui/icons-material/Delete";
-
-function Note(props) {
+import ChatIcon from "@mui/icons-material/Chat";
+import ChatbotBox from "./AI_chat/ChatbotBox";
+function Note({
+  id,
+  noteTitle,
+  description,
+  onEdit,
+  onDelete,
+  onToggleChat,
+  isChatVisible,
+  toggleChat,
+  setContent,
+}) {
   const navigate = useNavigate();
 
   function handleEditClick(event) {
     event.preventDefault();
-    navigate(`/notes/${props.id + 1}`);
-    props.onEdit(props.id);
+    navigate(`/notes/${id + 1}`);
+    onEdit(id);
   }
+
   function handleDeleteClick(event) {
     event.preventDefault();
-    navigate(`/notes/${props.id + 1}`);
-    props.onDelete(props.id);
-    props.setContent("notes");
+    navigate(`/notes/${id + 1}`);
+    onDelete(id);
+    setContent("notes");
+  }
+
+  function handleChatClick(event) {
+    event.preventDefault();
+    toggleChat();
   }
 
   // const formatUrl = (url) => {
@@ -29,28 +46,38 @@ function Note(props) {
 
   return (
     <div className="note">
-      <h1>{props.noteTitle}</h1>
-      <p>{props.description}</p>
+      <h1>{noteTitle}</h1>
+      <p>{description}</p>
+
+      <button onClick={handleChatClick}>
+        <ChatIcon />
+      </button>
+
       <Link
         component={Link}
         style={{ textDecoration: "none", color: "inherit" }}
         onClick={handleDeleteClick}
       >
-        <button onClick={handleDeleteClick}>
+        <button>
           <DeleteIcon />
         </button>
       </Link>
+
       <Link
         component={Link}
         style={{ textDecoration: "none", color: "inherit" }}
         onClick={handleEditClick}
       >
-        <button onClick={handleEditClick}>
+        <button>
           <EditNoteIcon />
         </button>
       </Link>
+
+      {/* ✅ Renderowanie chatbota tylko jeśli ten czat jest aktywny */}
+      {isChatVisible && <ChatbotBox />}
     </div>
   );
 }
 
 export default Note;
+

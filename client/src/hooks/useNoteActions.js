@@ -9,27 +9,35 @@ export default function useNoteActions({
     const scrollToTop = () => window.scrollTo(0, 0);
   
     const addNote = (newNote) => {
-      const updated = [...notes, newNote];
+      const formattedNote = {
+        notetitle: newNote.noteTitle ?? newNote.notetitle,
+        description: newNote.description,
+        id: newNote.id,
+      };
+      const updated = [...notes, formattedNote];
       setNotes(updated);
       showAlert("success", "New note added successfully!");
-    };
+    }; 
   
     const editNote = (id) => {
-      const note = notes.find((_, index) => index === id);
+      
+      const note = notes.find((note) => note.id === id);
       setEditingStates({ type: "edit", note });
       handleContent("notes");
       scrollToTop();
     };
   
     const deleteNote = (id) => {
-      const note = notes.find((_, index) => index === id);
+      const note = notes.find((note) => note.id === id);
       setEditingStates({ type: "delete", note });
       handleContent("notes");
       scrollToTop();
     };
   
     const removeNote = (id) => {
-      const updated = notes.filter((_, index) => index !== id);
+      // console.log("Usuwam notatkę z id:", id);
+      const updated = notes.filter((note) => note.id !== id);
+      // console.log("Lista po usunięciu:", updated);
       setNotes(updated);
       setEditingStates({ type: null, note: null });
       handleContent("home");

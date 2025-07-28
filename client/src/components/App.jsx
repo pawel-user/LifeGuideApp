@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -14,6 +14,12 @@ import useAlerts from "../hooks/useAlerts";
 import useNotes from "../hooks/useNotes";
 import useContent from "../hooks/useContent";
 import useNoteActions from "../hooks/useNoteActions";
+import ChatbotBox from "./AI_chat/ChatbotBox";
+import RedirectHandler from "./RedirectHandler";
+import useLayoutMargin from "../hooks/useLayoutMargin";
+// import adjustLayoutMargin from "../utils/adjustLayout";
+
+import "../CSS-styles/styles.css";
 
 function App() {
   const {
@@ -31,140 +37,193 @@ function App() {
 
   const [notes, setNotes] = useNotes(token, isLoggedIn, getValidToken, logout);
 
-  const [editingStates, setEditingStates] = React.useState({
+  const [editingStates, setEditingStates] = useState({
     type: null,
     note: null,
   });
 
-  const [isExpanded, setExpanded] = React.useState();
+  const [isExpanded, setExpanded] = useState(false);
 
-  const {
-    addNote,
-    editNote,
-    deleteNote,
-    removeNote,
-    cancelAction,
-  } = useNoteActions({
-    notes,
-    setNotes,
-    showAlert,
-    handleContent,
-    setEditingStates,
-  });
+  const { addNote, editNote, deleteNote, removeNote, cancelAction } =
+    useNoteActions({
+      notes,
+      setNotes,
+      showAlert,
+      handleContent,
+      setEditingStates,
+    });
+
+  const [visibleChatForNoteId, setVisibleChatForNoteId] = useState(null);
+
+  // 🔧 Dynamiczne dostosowanie marginesu
+  useLayoutMargin(isExpanded);
+
+  // useEffect(() => {
+  //   const cleanup = adjustLayoutMargin();
+  //   return () => {
+  //     if (typeof cleanup === "function") cleanup();
+  //   };
+  // }, []); // uruchamia przy starcie
+
+  // // useEffect(() => {
+  // //   if (isLoggedIn && token) {
+  // //     adjustLayoutMargin(); // ustawi poprawny offset na starcie po logowaniu
+  // //   }
+  // // }, [isLoggedIn, token]);
+
+  // useEffect(() => {
+  //   const timeout = setTimeout(() => {
+  //     adjustLayoutMargin(isExpanded);
+  //   }, 300);
+  //   return () => clearTimeout(timeout);
+  // }, [isExpanded]);
+  
 
   return (
-    <Router>
-      <div className="app-container">
-        <Header
-          isLoggedIn={isLoggedIn}
-          logout={logout}
-          setToken={setToken}
-          setLogin={setLogin}
-          setAlert={showAlert}
-          setContent={handleContent}
-          setNoteToEdit={(note) => setEditingStates({ type: "edit", note })}
-          setNotes={setNotes}
-          setIsDeleting={(flag) =>
-            setEditingStates((prev) => ({
-              ...prev,
-              type: flag ? "delete" : null,
-            }))
-          }
-        />
-        <div className={`content-${contentType}`}>
-          {alert.visible && (
-            <div className={`alert alert-${alert.type}`}>
-              {alert.message}
-            </div>
-          )}
+    <div className="main-app-wrapper">
+      <Router>
+        <div className="app-container">
+          <Header
+            isLoggedIn={isLoggedIn}
+            logout={logout}
+            setToken={setToken}
+            setLogin={setLogin}
+            setAlert={showAlert}
+            setContent={handleContent}
+            setNoteToEdit={(note) => setEditingStates({ type: "edit", note })}
+            setNotes={setNotes}
+            setIsDeleting={(flag) =>
+              setEditingStates((prev) => ({
+                ...prev,
+                type: flag ? "delete" : null,
+              }))
+            }
+          />
+          <div className={`content-${contentType}`}>
+            {alert.visible && (
+              <div className={`alert alert-${alert.type}`}>{alert.message}</div>
+            )}
 
-          {!isLoggedIn || !token ? (
-            <div className="main-panel-wrapper">
-              <Routes>
-                <Route path="/" element={<Welcome />} />
-                <Route
-                  path="/register"
-                  element={
-                    <Register
-                      setAlert={showAlert}
-                      setContent={handleContent}
-                    />
-                  }
-                />
-                <Route
-                  path="/login"
-                  element={
-                    <Login
-                      setToken={setToken} // → to teraz funkcja login
-                      setLogin={setLogin}
-                      setContent={handleContent}
-                      setAlert={showAlert}
-                    />
-                  }
-                />
-              </Routes>
-            </div>
-          ) : (
-            <div className="content">
-              {editingStates.type === "edit" ? (
-                <EditNote
-                  note={editingStates.note}
-                  onUpdate={(updatedNote) => {
-                    setNotes((prev) =>
-                      prev.map((note, index) =>
-                        index === editingStates.note.id - 1
-                          ? updatedNote
-                          : note
-                      )
-                    );
-                    setEditingStates({ type: null, note: null });
-                    handleContent("home");
-                  }}
-                  setAlert={showAlert}
-                  setContent={handleContent}
-                  cancelAction={cancelAction}
-                />
-              ) : editingStates.type === "delete" ? (
-                <DeleteNote
-                  note={editingStates.note}
-                  onRemove={removeNote}
-                  setAlert={showAlert}
-                  cancelAction={cancelAction}
-                />
-              ) : (
-                <>
-                  <CreateArea
-                    onAdd={addNote}
-                    setAlert={showAlert}
-                    setContent={handleContent}
-                    setExpanded={setExpanded}
-                    isExpanded={isExpanded}
-                  />
-                  {notes.length > 0 ? (
-                    notes.map((noteItem, index) => (
-                      <Note
-                        key={index}
-                        id={index}
-                        noteTitle={noteItem.notetitle}
-                        description={noteItem.description}
-                        onEdit={editNote}
-                        onDelete={deleteNote}
+            {!isLoggedIn || !token ? (
+              <div className="main-panel-wrapper">
+                <Routes>
+                  <Route path="/" element={<Welcome />} />
+                  <Route
+                    path="/register"
+                    element={
+                      <Register
+                        setAlert={showAlert}
                         setContent={handleContent}
                       />
-                    ))
-                  ) : (
-                    <div className="info-container">
-                      <p>No notes available</p>
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-          )}
+                    }
+                  />
+                  <Route
+                    path="/login"
+                    element={
+                      <Login
+                        setToken={setToken}
+                        setLogin={setLogin}
+                        setContent={handleContent}
+                        setAlert={showAlert}
+                      />
+                    }
+                  />
+                  <Route
+                    path="*"
+                    element={
+                      <RedirectHandler
+                        logout={logout}
+                        setLogin={setLogin}
+                        setToken={setToken}
+                        showAlert={showAlert}
+                      />
+                    }
+                  />
+                </Routes>
+              </div>
+            ) : (
+              <div className="content">
+                {editingStates.type === "edit" ? (
+                  <EditNote
+                    note={editingStates.note}
+                    onUpdate={(updatedNote) => {
+                      setNotes((prev) =>
+                        prev.map((note) =>
+                          note.id === updatedNote.id
+                            ? { ...note, ...updatedNote }
+                            : note
+                        )
+                      );
+                      setEditingStates({ type: null, note: null });
+                      handleContent("home");
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }}
+                    setAlert={showAlert}
+                    setContent={handleContent}
+                    cancelAction={cancelAction}
+                  />
+                ) : editingStates.type === "delete" ? (
+                  <DeleteNote
+                    note={editingStates.note}
+                    onRemove={removeNote}
+                    setAlert={showAlert}
+                    cancelAction={cancelAction}
+                  />
+                ) : (
+                  <>
+                    <CreateArea
+                      onAdd={addNote}
+                      setAlert={showAlert}
+                      setContent={handleContent}
+                      setExpanded={setExpanded}
+                      isExpanded={isExpanded}
+                    />
+                    {notes.length > 0 ? (
+                      <>
+                        {/* {console.log("Aktualny stan notes:", notes)} */}
+                        {/* {console.table(notes)} */}
+                        <div className="notes-container">
+                          {notes.map((noteItem, index) => (
+                            <React.Fragment key={index}>
+                              <Note
+                                id={noteItem.id}
+                                noteTitle={noteItem.noteTitle}
+                                description={noteItem.description}
+                                onEdit={editNote}
+                                onDelete={deleteNote}
+                                setContent={handleContent}
+                                onToggleChat={(id) =>
+                                  setVisibleChatForNoteId((prevId) =>
+                                    prevId === id ? null : id
+                                  )
+                                }
+                                isChatVisible={
+                                  visibleChatForNoteId === noteItem.id
+                                }
+                                toggleChat={() =>
+                                  setVisibleChatForNoteId((prevId) =>
+                                    prevId === noteItem.id ? null : noteItem.id
+                                  )
+                                }
+                              />
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="info-container">
+                        <p>No notes available</p>
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          <Footer />
         </div>
-        <Footer />
-      </div>
-    </Router>
+      </Router>
+    </div>
   );
 }
 

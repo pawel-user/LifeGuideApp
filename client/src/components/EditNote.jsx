@@ -6,10 +6,11 @@ import ClearAllIcon from "@mui/icons-material/ClearAll";
 import CloseIcon from "@mui/icons-material/Close";
 
 function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
+  // console.log("📋 Notatka przekazana do EditNote:", note);
   const [isExpanded, setExpanded] = useState(false);
   const [editedNote, setEditedNote] = useState({
-    notetitle: note.notetitle || "",
-    description: note.description || "",
+    noteTitle: note.noteTitle ?? note.notetitle ?? "",
+    description: note.description ?? "",
     id: note.id,
   });
 
@@ -24,13 +25,16 @@ function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
   async function handleSubmit(event) {
     event.preventDefault();
 
-    if (!editedNote.notetitle || !editedNote.description) {
+    if (!editedNote.noteTitle || !editedNote.description) {
       setAlert("error", "You need to fill out all fields before saving.");
       return;
     }
 
     try {
-      const response = await editNote(editedNote.id, editedNote);
+      const response = await editNote(editedNote.id, {
+        noteTitle: editedNote.noteTitle,
+        description: editedNote.description,
+      });
 
       if (response?.status === 404) {
         setAlert("error", "Note not found.");
@@ -56,7 +60,7 @@ function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
     event.preventDefault();
     setAlert("info", "Editing canceled.");
     setContent("home");
-    cancelAction(); // korzysta z useNoteActions
+    cancelAction();
   }
 
   function toggle(isExpanded) {
@@ -66,7 +70,7 @@ function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
   function clearInputs(event) {
     event.preventDefault();
     setEditedNote({
-      notetitle: "",
+      noteTitle: "",
       description: "",
       id: note.id,
     });
@@ -77,9 +81,9 @@ function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
       <form className="create-note" onSubmit={handleSubmit}>
         <h2>Edit User Note</h2>
         <input
-          name="notetitle"
+          name="noteTitle"
           onChange={handleChange}
-          value={editedNote.notetitle}
+          value={editedNote.noteTitle}
           placeholder="Title of the life problem"
         />
         <textarea

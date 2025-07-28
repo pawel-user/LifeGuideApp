@@ -20,8 +20,8 @@ function Header({
   const handleReturnToHome = (e) => {
     e.preventDefault();
     setContent(isLoggedIn ? "home" : "start");
-    setNoteToEdit(null);      // czyści notatkę do edycji
-    setIsDeleting(false);     // czyści stan usuwania
+    setNoteToEdit(null);
+    setIsDeleting(false);
     navigate("/");
   };
 
