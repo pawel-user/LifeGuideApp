@@ -36,11 +36,15 @@ export default function useAuth() {
     }
   };
 
-  const logout = () => {
+  const logout = (navigateTo = null) => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
     setTokenState("");
     setIsLoggedIn(false);
+  
+    if (typeof navigateTo === "function") {
+      navigateTo("/");
+    }
   };
 
   const getValidToken = async () => {

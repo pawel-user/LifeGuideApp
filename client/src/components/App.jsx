@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import React, { useState } from "react";
+import { Routes, Route } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
 import Note from "./Note";
@@ -16,9 +16,9 @@ import useContent from "../hooks/useContent";
 import useNoteActions from "../hooks/useNoteActions";
 import useLayoutMargin from "../hooks/useLayoutMargin";
 import useFetchNotes from "../hooks/useFetchNotes";
+import { usePostLoginEffect } from "../hooks/usePostLoginEffect";
 // import ChatbotBox from "./AI_chat/ChatbotBox";
 import RedirectHandler from "./RedirectHandler";
-
 
 import "../CSS-styles/styles.css";
 
@@ -55,14 +55,15 @@ function App() {
     });
 
   const [visibleChatForNoteId, setVisibleChatForNoteId] = useState(null);
- 
 
   useLayoutMargin(isExpanded);
   useFetchNotes({ isLoggedIn, token, getValidToken, setNotes, showAlert });
+  usePostLoginEffect({ isLoggedIn, token, setEditingStates });
+ 
 
   return (
     <div className="main-app-wrapper">
-      <Router>
+      {/* <Router> */}
         <div className="app-container">
           <Header
             isLoggedIn={isLoggedIn}
@@ -159,7 +160,7 @@ function App() {
                       setExpanded={setExpanded}
                       isExpanded={isExpanded}
                     />
-                  {/* {console.log("Notes:", notes)} */}
+                    
                     {Array.isArray(notes) && notes.length > 0 ? (
                       <>
                         <div className="notes-container">
@@ -202,7 +203,7 @@ function App() {
           </div>
           <Footer />
         </div>
-      </Router>
+      {/* </Router> */}
     </div>
   );
 }

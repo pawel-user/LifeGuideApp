@@ -11,10 +11,9 @@ export async function getNotes(token) {
       },
     });
 
-    // 🛠️ Naprawa struktury – zmieniamy notetitle → noteTitle
     const result = response.data.map((note) => ({
       id: note.id,
-      noteTitle: note.notetitle,       // 👈 to jest kluczowe!
+      noteTitle: note.notetitle, 
       description: note.description,
     }));
 
@@ -35,8 +34,6 @@ export async function addNote(newNote) {
       },
     });
 
-    // const data = response.data; // 👈 tu jest { id: ... }
-    // console.log("🧾 Odpowiedź z serwera:", response.data);
     return {
       id: response.data.id,
       noteTitle: newNote.noteTitle ?? newNote.notetitle,
@@ -57,7 +54,6 @@ export async function editNote(noteId, noteData) {
         Authorization: `Bearer ${token}`,
       },
     });
-    // mapowanie notetitle → noteTitle
     const mapped = response.data;
     return {
       id: mapped.id,

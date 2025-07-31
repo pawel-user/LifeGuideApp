@@ -6,7 +6,6 @@ import ClearAllIcon from "@mui/icons-material/ClearAll";
 import CloseIcon from "@mui/icons-material/Close";
 
 function EditNote({ note, onUpdate, setAlert, setContent, cancelAction }) {
-  // console.log("📋 Notatka przekazana do EditNote:", note);
   const [isExpanded, setExpanded] = useState(false);
   const [editedNote, setEditedNote] = useState({
     noteTitle: note.noteTitle ?? note.notetitle ?? "",

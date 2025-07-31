@@ -35,9 +35,7 @@ export default function useNoteActions({
     };
   
     const removeNote = (id) => {
-      // console.log("Usuwam notatkę z id:", id);
       const updated = notes.filter((note) => note.id !== id);
-      // console.log("Lista po usunięciu:", updated);
       setNotes(updated);
       setEditingStates({ type: null, note: null });
       handleContent("home");

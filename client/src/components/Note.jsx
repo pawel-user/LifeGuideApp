@@ -27,7 +27,6 @@ function Note({
   function handleDeleteClick(event) {
     event.preventDefault();
     navigate(`/notes/${id + 1}`);
-    console.log("Deleting:", { id, noteTitle, description });
     onDelete(id, noteTitle, description);
     setContent("notes");
   }

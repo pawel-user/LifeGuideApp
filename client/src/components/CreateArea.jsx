@@ -37,8 +37,6 @@ function CreateArea(props) {
     try {
       const response = await addNote(note);
 
-      console.log("✅ Dodano notatkę:", response);
-
       if (response && response.id) {
         const newNote = {
           id: response.id,
