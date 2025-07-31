@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { addNote } from "../services/userNotes.js";
 import AddIcon from "@mui/icons-material/Add";
 import WrapTextIcon from "@mui/icons-material/WrapText";

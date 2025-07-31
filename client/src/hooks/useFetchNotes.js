@@ -14,7 +14,7 @@ export default function useFetchNotes({
         if (!validToken) return;
 
         const response = await fetch(
-          `${process.env.REACT_APP_API_URL}/user/notes`,
+          `${import.meta.env.VITE_API_URL}/user/notes`,
           {
             headers: {
               Authorization: `Bearer ${validToken}`,
