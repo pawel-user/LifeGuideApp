@@ -63,7 +63,6 @@ function App() {
 
   return (
     <div className="main-app-wrapper">
-      {/* <Router> */}
         <div className="app-container">
           <Header
             isLoggedIn={isLoggedIn}
@@ -203,7 +202,6 @@ function App() {
           </div>
           <Footer />
         </div>
-      {/* </Router> */}
     </div>
   );
 }

@@ -4,10 +4,11 @@
     "description": "Root config to orchestrate frontend and backend for Life Guide App",
     "private": true,
     "scripts": {
-        "dev": "concurrently \"npm --prefix client start\" \"npm --prefix server run dev\"",
+        "dev": "concurrently -n CLIENT,SERVER -c blue,green \"npm --prefix client start\" \"npm --prefix server run dev\"",
         "install-all": "npm --prefix client install && npm --prefix server install"
     },
     "devDependencies": {
-        "concurrently": "^8.2.2"
+        "concurrently": "^9.2.0",
+        "nodemon": "^3.1.10"
     }
 }
