@@ -14,10 +14,11 @@ import useAlerts from "../hooks/useAlerts";
 import useNotes from "../hooks/useNotes";
 import useContent from "../hooks/useContent";
 import useNoteActions from "../hooks/useNoteActions";
-import ChatbotBox from "./AI_chat/ChatbotBox";
-import RedirectHandler from "./RedirectHandler";
 import useLayoutMargin from "../hooks/useLayoutMargin";
-// import adjustLayoutMargin from "../utils/adjustLayout";
+import useFetchNotes from "../hooks/useFetchNotes";
+// import ChatbotBox from "./AI_chat/ChatbotBox";
+import RedirectHandler from "./RedirectHandler";
+
 
 import "../CSS-styles/styles.css";
 
@@ -54,30 +55,10 @@ function App() {
     });
 
   const [visibleChatForNoteId, setVisibleChatForNoteId] = useState(null);
+ 
 
-  // 🔧 Dynamiczne dostosowanie marginesu
   useLayoutMargin(isExpanded);
-
-  // useEffect(() => {
-  //   const cleanup = adjustLayoutMargin();
-  //   return () => {
-  //     if (typeof cleanup === "function") cleanup();
-  //   };
-  // }, []); // uruchamia przy starcie
-
-  // // useEffect(() => {
-  // //   if (isLoggedIn && token) {
-  // //     adjustLayoutMargin(); // ustawi poprawny offset na starcie po logowaniu
-  // //   }
-  // // }, [isLoggedIn, token]);
-
-  // useEffect(() => {
-  //   const timeout = setTimeout(() => {
-  //     adjustLayoutMargin(isExpanded);
-  //   }, 300);
-  //   return () => clearTimeout(timeout);
-  // }, [isExpanded]);
-  
+  useFetchNotes({ isLoggedIn, token, getValidToken, setNotes, showAlert });
 
   return (
     <div className="main-app-wrapper">
@@ -178,10 +159,9 @@ function App() {
                       setExpanded={setExpanded}
                       isExpanded={isExpanded}
                     />
-                    {notes.length > 0 ? (
+                  {/* {console.log("Notes:", notes)} */}
+                    {Array.isArray(notes) && notes.length > 0 ? (
                       <>
-                        {/* {console.log("Aktualny stan notes:", notes)} */}
-                        {/* {console.table(notes)} */}
                         <div className="notes-container">
                           {notes.map((noteItem, index) => (
                             <React.Fragment key={index}>

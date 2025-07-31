@@ -37,7 +37,7 @@ function DeleteNote({ note, onRemove, setAlert, cancelAction }) {
         <div className="note-details">
           <div className="note-field">
             <label>Note Title:</label>
-            <span>{note.notetitle || "No data"}</span>
+            <span>{note?.notetitle || note?.noteTitle || "No data"}</span>
           </div>
           <div className="note-field">
             <label>Description:</label>

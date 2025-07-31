@@ -10,7 +10,7 @@ export default function useNoteActions({
   
     const addNote = (newNote) => {
       const formattedNote = {
-        notetitle: newNote.noteTitle ?? newNote.notetitle,
+        noteTitle: newNote.noteTitle ?? newNote.notetitle,
         description: newNote.description,
         id: newNote.id,
       };

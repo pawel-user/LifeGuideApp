@@ -12,7 +12,7 @@ function CreateArea(props) {
     description: "",
   });
 
-  useLayoutMargin(props.isExpanded); // 🚀 Nowy hook zamiast adjustLayoutMargin
+  useLayoutMargin(props.isExpanded);
 
   function handleChange(event) {
     const { name, value } = event.target;

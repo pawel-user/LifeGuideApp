@@ -1,11 +1,11 @@
-import axios from "axios";
+import api from "./axiosConfig.js";
 
 const port = 8080;
 const API_URL = process.env.REACT_APP_API_URL || `http://localhost:${port}`;
 
 export async function getUsers() {
   try {
-    const response = await axios.get(API_URL + "/users");
+    const response = await api.get(API_URL + "/users");
     const result = response.data;
     return result;
   } catch (error) {
@@ -15,7 +15,7 @@ export async function getUsers() {
 
 export async function registerUser(newUserData) {
   try {
-    const response = await axios.post(
+    const response = await api.post(
       API_URL + "/register",
       newUserData,
       { headers: { "Content-Type": "application/json" } }

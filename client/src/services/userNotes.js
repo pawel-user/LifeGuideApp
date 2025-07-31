@@ -1,11 +1,11 @@
-import axios from "axios";
+import api from "./axiosConfig.js";
 
 const port = 8080;
 const API_URL = process.env.REACT_APP_API_URL || `http://localhost:${port}`;
 
 export async function getNotes(token) {
   try {
-    const response = await axios.get(API_URL + "/user/notes", {
+    const response = await api.get(API_URL + "/user/notes", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -28,13 +28,20 @@ export async function getNotes(token) {
 export async function addNote(newNote) {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.post(API_URL + "/add/notes", newNote, {
+    const response = await api.post(API_URL + "/add/notes", newNote, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data;
+
+    // const data = response.data; // 👈 tu jest { id: ... }
+    // console.log("🧾 Odpowiedź z serwera:", response.data);
+    return {
+      id: response.data.id,
+      noteTitle: newNote.noteTitle ?? newNote.notetitle,
+      description: newNote.description,
+    };
   } catch (error) {
     console.error("Adding new note error: ", error);
     throw error;
@@ -44,13 +51,19 @@ export async function addNote(newNote) {
 export async function editNote(noteId, noteData) {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.patch(`${API_URL}/notes/${noteId}`, noteData, {
+    const response = await api.patch(`${API_URL}/notes/${noteId}`, noteData, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data;
+    // mapowanie notetitle → noteTitle
+    const mapped = response.data;
+    return {
+      id: mapped.id,
+      noteTitle: mapped.notetitle,
+      description: mapped.description,
+    };
   } catch (error) {
     console.error("Error in editNote:", error);
     throw error;
@@ -60,14 +73,19 @@ export async function editNote(noteId, noteData) {
 export async function deleteNote(noteId) {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.delete(`${API_URL}/notes/${noteId}`, 
+    const response = await api.delete(`${API_URL}/notes/${noteId}`, 
     {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
     });
-    return response.data;
+    const deleted = response.data.deletedNote;
+    return {
+      id: deleted.id,
+      noteTitle: deleted.notetitle,
+      description: deleted.description,
+    };
   } catch (error) {
     console.error("Error in deleteNote:", error);
     throw error;

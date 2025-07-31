@@ -362,11 +362,13 @@ form p.form-question {
 
 .delete-container, .edit-container {
   align-items: center;
+  margin-top: 340px;
   position: fixed;
   width: 100%;
 }
 
 .info-container {
+  margin-top: 500px;
   text-align: center;
   position: fixed;
   width: 100%;

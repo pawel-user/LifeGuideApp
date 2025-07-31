@@ -1,10 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/loggedUsers.js";
-import axios from "axios";
 import PropTypes from "prop-types";
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
 export default function Login({ setToken, setAlert, setContent }) {
   const [username, setUserName] = useState("");
@@ -15,36 +12,18 @@ export default function Login({ setToken, setAlert, setContent }) {
     e.preventDefault();
 
     try {
-      const { token, refreshToken } = await loginUser(
-        { username, password },
-        setAlert
-      );
+      const { token, refreshToken } = await loginUser({ username, password }, setAlert);
 
       if (token && refreshToken) {
         setToken(token, refreshToken);
-
-        const response = await axios.get(`${API_URL}/user/notes`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.status === 200) {
-          setNotes(response.data);
-          // console.log("User notes:", response.data);
-          // jeśli chcesz, możesz dodać tutaj setNotes(response.data);
-        } else {
-          setAlert("warning", "No notes found for user.");
-        }
-
         setAlert("success", "Login Successful");
         setContent("home");
         navigate("/");
       } else {
         setAlert("error", "Login failed: missing token(s)");
       }
-    } catch (error) {
-      // błąd obsłużony już w loginUser()
+    } catch {
+      // Obsługa błędów już w loginUser()
     }
   };
 
@@ -58,6 +37,7 @@ export default function Login({ setToken, setAlert, setContent }) {
     <div className="login-container">
       <form onSubmit={handleSubmit}>
         <h2>Log In Panel</h2>
+
         <div className="form-group">
           <label>
             <p>Username</p>
@@ -71,6 +51,7 @@ export default function Login({ setToken, setAlert, setContent }) {
             />
           </label>
         </div>
+
         <div className="form-group">
           <label>
             <p>Password</p>
@@ -84,17 +65,10 @@ export default function Login({ setToken, setAlert, setContent }) {
             />
           </label>
         </div>
+
         <div className="button-container">
-          <button type="submit" className="btn btn-dark">
-            Submit
-          </button>
-          <button
-            type="button"
-            onClick={handleCancel}
-            className="btn btn-outline-secondary"
-          >
-            Cancel
-          </button>
+          <button type="submit" className="btn btn-dark">Submit</button>
+          <button type="button" onClick={handleCancel} className="btn btn-outline-secondary">Cancel</button>
         </div>
       </form>
     </div>

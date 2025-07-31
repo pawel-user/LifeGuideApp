@@ -33,6 +33,8 @@ export default function useNotes(token, isLoggedIn, getValidToken, logout) {
           }));
 
           setNotes(transformed);
+        } else if (response.status === 404) {
+          setNotes([]);
         } else {
           setNotes([]);
           logout();

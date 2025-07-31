@@ -4,6 +4,7 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ChatIcon from "@mui/icons-material/Chat";
 import ChatbotBox from "./AI_chat/ChatbotBox";
+
 function Note({
   id,
   noteTitle,
@@ -20,13 +21,14 @@ function Note({
   function handleEditClick(event) {
     event.preventDefault();
     navigate(`/notes/${id + 1}`);
-    onEdit(id);
+    onEdit(id, noteTitle, description);
   }
 
   function handleDeleteClick(event) {
     event.preventDefault();
     navigate(`/notes/${id + 1}`);
-    onDelete(id);
+    console.log("Deleting:", { id, noteTitle, description });
+    onDelete(id, noteTitle, description);
     setContent("notes");
   }
 
