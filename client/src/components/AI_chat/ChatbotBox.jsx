@@ -8,7 +8,11 @@ import ChatMessage from "./ChatMessage";
 function ChatbotBox() {
   const [chatHistory, setChatHistory] = useState([]);
 
-  console.log("ChatbotBox rendered");
+  const generateBotResponse = (history) => {
+    console.log(history);
+  }
+
+  // console.log("ChatbotBox rendered");
   return (
     <div className="chatbox-wrapper">
       <div className="container show-chatbot">
@@ -39,7 +43,7 @@ function ChatbotBox() {
 
           {/* Chatbot Footer */}
           <div className="chat-footer">
-            <ChatForm setChatHistory={setChatHistory} />
+            <ChatForm chatHistory={chatHistory} setChatHistory={setChatHistory} generateBotResponse={generateBotResponse}/>
           </div>
         </div>
       </div>

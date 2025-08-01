@@ -68,9 +68,10 @@
 .chatbox-wrapper .chatbot-popup {
   position: fixed;
   bottom: 90px;
+  top: 150px;
   right: 35px;
   width: 420px;
-  max-height: 600px;
+  max-height: calc(100vh - 120px); /* 👈 100vh minus odstęp od góry */
   display: flex;
   flex-direction: column;
   background: #fff;
@@ -83,6 +84,7 @@
   transform: scale(0.2);
   pointer-events: none;
   transform-origin: bottom right;
+  z-index: 2000;
 }
 
 .chatbox-wrapper .container.show-chatbot .chatbot-popup {
