@@ -8,9 +8,38 @@ import ChatMessage from "./ChatMessage";
 function ChatbotBox() {
   const [chatHistory, setChatHistory] = useState([]);
 
-  const generateBotResponse = (history) => {
-    console.log(history);
-  }
+  const generateBotResponse = async (history) => {
+    const formattedHistory = history.map(({ role, text }) => ({
+      role,
+      parts: [{ text }],
+    }));
+  
+    const requestOptions = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ contents: formattedHistory }),
+    };
+  
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_GEMINI_API_URL}?key=${import.meta.env.VITE_API_KEY}`,
+        requestOptions
+      );
+      const text = await response.text();
+  
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${text}`);
+      }
+  
+      const data = text ? JSON.parse(text) : {};
+      console.log("Odpowiedź Gemini:", data);
+      // Tu możesz wyciągnąć odpowiedź z data.candidates[0].content.parts[0].text
+    } catch (error) {
+      console.error("Błąd API:", error.message);
+    }
+  };
 
   // console.log("ChatbotBox rendered");
   return (
@@ -43,7 +72,11 @@ function ChatbotBox() {
 
           {/* Chatbot Footer */}
           <div className="chat-footer">
-            <ChatForm chatHistory={chatHistory} setChatHistory={setChatHistory} generateBotResponse={generateBotResponse}/>
+            <ChatForm
+              chatHistory={chatHistory}
+              setChatHistory={setChatHistory}
+              generateBotResponse={generateBotResponse}
+            />
           </div>
         </div>
       </div>

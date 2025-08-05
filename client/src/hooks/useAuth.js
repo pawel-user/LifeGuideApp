@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
 export default function useAuth() {
   const [token, setTokenState] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -71,12 +73,12 @@ export default function useAuth() {
         return null;
       }
 
-      const res = await fetch("/token", {
+      const res = await fetch(`${API_URL}/token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
-
+   
       if (!res.ok) {
         logout();
         throw new Error("Session expired. Please log in again.");

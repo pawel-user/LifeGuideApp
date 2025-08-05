@@ -3,12 +3,16 @@
     "version": "1.0.0",
     "description": "Root config to orchestrate frontend and backend for Life Guide App",
     "private": true,
-"scripts": {
-  "dev": "concurrently -n CLIENT,SERVER -c blue,green \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
-  "install-all": "npm --prefix client install && npm --prefix server install"
-},
+    "scripts": {
+        "dev": "concurrently -n CLIENT,SERVER -c blue,green \"npm --prefix client run dev\" \"npm --prefix server run dev\"",
+        "install-all": "npm --prefix client install && npm --prefix server install"
+    },
     "devDependencies": {
         "concurrently": "^9.2.0",
         "nodemon": "^3.1.10"
+    },
+    "dependencies": {
+        "@google/genai": "^1.12.0",
+        "dotenv": "^17.2.1"
     }
 }
