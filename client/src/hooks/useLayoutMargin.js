@@ -4,21 +4,27 @@ export default function useLayoutMargin(isExpanded = false) {
   useEffect(() => {
     const setMargin = () => {
       const createArea = document.querySelector(".create-note-area");
-      const content = document.querySelector(".notes-container");
+      const notesContainer = document.querySelector(".notes-container");
       const header = document.querySelector("header");
 
-      if (createArea && content && header) {
+      if (createArea && notesContainer && header) {
         const areaHeight = createArea.getBoundingClientRect().height;
         const headerHeight = header.getBoundingClientRect().height;
         const marginOffset = headerHeight + areaHeight - 80;
-        content.style.marginTop = `${marginOffset}px`;
+
+        document.documentElement.style.setProperty(
+          "--layout-margin",
+          `${marginOffset}px`
+        );
+
+        notesContainer.style.marginTop = `${marginOffset}px`; // ✅ teraz działa
       }
     };
 
-    // 💡 Aktualizuj margines na starcie
+    // ⏱ Poczekaj chwilę po załadowaniu
     const timeout = setTimeout(() => {
       setMargin();
-    }, 150);
+    }, 300);
 
     // 🌀 Obserwuj zmiany wysokości formularza
     const createArea = document.querySelector(".create-note-area");
@@ -27,9 +33,18 @@ export default function useLayoutMargin(isExpanded = false) {
       : null;
     if (resizeObserver && createArea) resizeObserver.observe(createArea);
 
-    // 🖼 Aktualizuj po każdej zmianie `isExpanded`
-    requestAnimationFrame(() => {
-      setMargin();
+    // 🧬 Obserwuj DOM, czy notes-container się pojawi
+    const observer = new MutationObserver(() => {
+      const notesContainer = document.querySelector(".notes-container");
+      if (notesContainer) {
+        setMargin();
+        observer.disconnect(); // tylko raz
+      }
+    });
+
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
     });
 
     // 🌍 Aktualizuj przy zmianie rozmiaru okna
@@ -38,6 +53,7 @@ export default function useLayoutMargin(isExpanded = false) {
     return () => {
       clearTimeout(timeout);
       if (resizeObserver) resizeObserver.disconnect();
+      observer.disconnect();
       window.removeEventListener("resize", setMargin);
     };
   }, [isExpanded]);

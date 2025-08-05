@@ -17,7 +17,6 @@ import useNoteActions from "../hooks/useNoteActions";
 import useLayoutMargin from "../hooks/useLayoutMargin";
 import useFetchNotes from "../hooks/useFetchNotes";
 import { usePostLoginEffect } from "../hooks/usePostLoginEffect";
-// import ChatbotBox from "./AI_chat/ChatbotBox";
 import RedirectHandler from "./RedirectHandler";
 
 import "../CSS-styles/styles.css";
