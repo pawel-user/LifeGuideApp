@@ -1,24 +1,27 @@
 // ./AI_chat/ChatbotBox.jsx
-import React, {useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import ChatbotIcon from "./ChatbotIcon";
 import ChatForm from "./ChatForm";
 import "../../CSS-styles/chat-styles.css";
 import ChatMessage from "./ChatMessage";
 
-function ChatbotBox() {
+function ChatbotBox({ onClose }) {
   const [chatHistory, setChatHistory] = useState([]);
   const chatBodyRef = useRef();
 
   const generateBotResponse = async (history) => {
     // Helper function to update chat history
-    const updateHistory = (text) => {
-      setChatHistory(prev => [...prev.filter(msg => msg.text !== "Thinking..."), {role: "model", text}]);
-    }
+    const updateHistory = (text, isError = false) => {
+      setChatHistory((prev) => [
+        ...prev.filter((msg) => msg.text !== "Thinking..."),
+        { role: "model", text, isError },
+      ]);
+    };
     const formattedHistory = history.map(({ role, text }) => ({
       role,
       parts: [{ text }],
     }));
-  
+
     const requestOptions = {
       method: "POST",
       headers: {
@@ -26,43 +29,50 @@ function ChatbotBox() {
       },
       body: JSON.stringify({ contents: formattedHistory }),
     };
-  
+
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_GEMINI_API_URL}?key=${import.meta.env.VITE_API_KEY}`,
+        `${import.meta.env.VITE_GEMINI_API_URL}?key=${
+          import.meta.env.VITE_API_KEY
+        }`,
         requestOptions
       );
-      const text = await response.text();
-  
+      const data = await response.json();
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${text}`);
+        throw new Error(data.error.message || "Something went wrong!");
       }
-  
-      const data = text ? JSON.parse(text) : {};
+
+      // const data = text ? JSON.parse(text) : {};
 
       // Clean and update chat history with bot's response
-      const apiResponseText = data.candidates[0].content.parts[0].text.replace(/\*\*(.*?)\*\*/g, "$1").trim();
+      const apiResponseText = data.candidates[0].content.parts[0].text
+        .replace(/\*\*(.*?)\*\*/g, "$1")
+        .trim();
       updateHistory(apiResponseText);
     } catch (error) {
-      console.error("Błąd API:", error.message);
+      updateHistory(error.message, true);
     }
   };
 
   useEffect(() => {
     // Auto-scroll whenever chat history updates
-    chatBodyRef.current.scrollTo({top: chatBodyRef.current.scrollHeight, behavior: "smooth"});
+    chatBodyRef.current.scrollTo({
+      top: chatBodyRef.current.scrollHeight,
+      behavior: "smooth",
+    });
   }, [chatHistory]);
 
   return (
     <div className="chatbox-wrapper">
-      <div className="container show-chatbot">
+      <div className={"container show-chatbot"}>
         <div className="chatbot-popup">
           {/* Chatbot Header */}
           <div className="chat-header">
             <div className="header-info">
               <ChatbotIcon />
               <h2 className="logo-text">ChatCoach</h2>
-              <button className="material-symbols-rounded">
+              <button onClick={onClose} className="material-symbols-rounded">
                 keyboard_arrow_down
               </button>
             </div>

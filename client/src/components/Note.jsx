@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import DeleteIcon from "@mui/icons-material/Delete";
-import ChatIcon from "@mui/icons-material/Chat";
+import ModeCommentIcon from "@mui/icons-material/ModeComment";
+import CloseIcon from "@mui/icons-material/Close";
 import ChatbotBox from "./AI_chat/ChatbotBox";
 
 function Note({
@@ -11,7 +12,6 @@ function Note({
   description,
   onEdit,
   onDelete,
-  onToggleChat,
   isChatVisible,
   toggleChat,
   setContent,
@@ -31,11 +31,6 @@ function Note({
     setContent("notes");
   }
 
-  function handleChatClick(event) {
-    event.preventDefault();
-    toggleChat();
-  }
-
   // const formatUrl = (url) => {
   //   if (!/^https?:\/\//i.test(url)) {
   //     return `https://${url}`;
@@ -46,39 +41,42 @@ function Note({
   // const url = formatUrl(props.url);
 
   return (
-    <div className="note">
-      <h1>{noteTitle}</h1>
-      <p>{description}</p>
+    <>
+      <div className="note">
+        <h1>{noteTitle}</h1>
+        <p>{description}</p>
 
-      <button onClick={handleChatClick}>
-        <ChatIcon />
-      </button>
-
-      <Link
-        component={Link}
-        style={{ textDecoration: "none", color: "inherit" }}
-        onClick={handleDeleteClick}
-      >
-        <button>
-          <DeleteIcon />
+        {/* 🔘 Przycisk do otwierania/zamykania chatbota */}
+        <button onClick={toggleChat} id="chatbot-toggler">
+          <span className="material-symbols-rounded">
+            {isChatVisible ? <CloseIcon /> : <ModeCommentIcon />}
+          </span>
         </button>
-      </Link>
 
-      <Link
-        component={Link}
-        style={{ textDecoration: "none", color: "inherit" }}
-        onClick={handleEditClick}
-      >
-        <button>
-          <EditNoteIcon />
-        </button>
-      </Link>
+        <Link
+          component={Link}
+          style={{ textDecoration: "none", color: "inherit" }}
+          onClick={handleDeleteClick}
+        >
+          <button>
+            <DeleteIcon />
+          </button>
+        </Link>
 
-      {/* ✅ Renderowanie chatbota tylko jeśli ten czat jest aktywny */}
-      {isChatVisible && <ChatbotBox />}
-    </div>
+        <Link
+          component={Link}
+          style={{ textDecoration: "none", color: "inherit" }}
+          onClick={handleEditClick}
+        >
+          <button>
+            <EditNoteIcon />
+          </button>
+        </Link>
+      </div>
+
+      {isChatVisible && <ChatbotBox onClose={toggleChat} />}
+    </>
   );
 }
 
 export default Note;
-

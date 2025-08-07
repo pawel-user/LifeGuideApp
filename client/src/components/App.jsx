@@ -16,6 +16,7 @@ import useContent from "../hooks/useContent";
 import useNoteActions from "../hooks/useNoteActions";
 import useLayoutMargin from "../hooks/useLayoutMargin";
 import useFetchNotes from "../hooks/useFetchNotes";
+import useChatbot from "../hooks/useChatbot";
 import { usePostLoginEffect } from "../hooks/usePostLoginEffect";
 import RedirectHandler from "./RedirectHandler";
 
@@ -43,6 +44,10 @@ function App() {
   });
 
   const [isExpanded, setExpanded] = useState(false);
+  // const [visibleChatForNoteId, setVisibleChatForNoteId] = useState(null);
+
+  const isEditing = editingStates.type === "edit";
+  const isDeleting = editingStates.type === "delete";
 
   const { addNote, editNote, deleteNote, removeNote, cancelAction } =
     useNoteActions({
@@ -53,154 +58,150 @@ function App() {
       setEditingStates,
     });
 
-  const [visibleChatForNoteId, setVisibleChatForNoteId] = useState(null);
+  const { visibleChatForNoteId, toggleChatForNote } = useChatbot();
 
   useLayoutMargin(isExpanded);
   useFetchNotes({ isLoggedIn, token, getValidToken, setNotes, showAlert });
   usePostLoginEffect({ isLoggedIn, token, setEditingStates });
- 
+
+  // const toggleChatForNote = (id) => {
+  //   setVisibleChatForNoteId((prevId) => (prevId === id ? null : id));
+  // };
 
   return (
     <div className="main-app-wrapper">
-        <div className="app-container">
-          <Header
-            isLoggedIn={isLoggedIn}
-            logout={logout}
-            setToken={setToken}
-            setLogin={setLogin}
-            setAlert={showAlert}
-            setContent={handleContent}
-            setNoteToEdit={(note) => setEditingStates({ type: "edit", note })}
-            setNotes={setNotes}
-            setIsDeleting={(flag) =>
-              setEditingStates((prev) => ({
-                ...prev,
-                type: flag ? "delete" : null,
-              }))
-            }
-          />
-          <div className={`content-${contentType}`}>
-            {alert.visible && (
-              <div className={`alert alert-${alert.type}`}>{alert.message}</div>
-            )}
+      <div className="app-container">
+        <Header
+          isLoggedIn={isLoggedIn}
+          logout={logout}
+          setToken={setToken}
+          setLogin={setLogin}
+          setAlert={showAlert}
+          setContent={handleContent}
+          setNoteToEdit={(note) => setEditingStates({ type: "edit", note })}
+          setNotes={setNotes}
+          setIsDeleting={(flag) =>
+            setEditingStates((prev) => ({
+              ...prev,
+              type: flag ? "delete" : null,
+            }))
+          }
+        />
 
-            {!isLoggedIn || !token ? (
-              <div className="main-panel-wrapper">
-                <Routes>
-                  <Route path="/" element={<Welcome />} />
-                  <Route
-                    path="/register"
-                    element={
-                      <Register
-                        setAlert={showAlert}
-                        setContent={handleContent}
-                      />
-                    }
-                  />
-                  <Route
-                    path="/login"
-                    element={
-                      <Login
-                        setToken={setToken}
-                        setLogin={setLogin}
-                        setContent={handleContent}
-                        setAlert={showAlert}
-                      />
-                    }
-                  />
-                  <Route
-                    path="*"
-                    element={
-                      <RedirectHandler
-                        logout={logout}
-                        setLogin={setLogin}
-                        setToken={setToken}
-                        showAlert={showAlert}
-                      />
-                    }
-                  />
-                </Routes>
-              </div>
-            ) : (
-              <div className="content">
-                {editingStates.type === "edit" ? (
-                  <EditNote
-                    note={editingStates.note}
-                    onUpdate={(updatedNote) => {
-                      setNotes((prev) =>
-                        prev.map((note) =>
-                          note.id === updatedNote.id
-                            ? { ...note, ...updatedNote }
-                            : note
-                        )
-                      );
-                      setEditingStates({ type: null, note: null });
-                      handleContent("home");
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }}
-                    setAlert={showAlert}
-                    setContent={handleContent}
-                    cancelAction={cancelAction}
-                  />
-                ) : editingStates.type === "delete" ? (
-                  <DeleteNote
-                    note={editingStates.note}
-                    onRemove={removeNote}
-                    setAlert={showAlert}
-                    cancelAction={cancelAction}
-                  />
-                ) : (
-                  <>
-                    <CreateArea
-                      onAdd={addNote}
+        <div className={`content-${contentType}`}>
+          {alert.visible && (
+            <div className={`alert alert-${alert.type}`}>{alert.message}</div>
+          )}
+
+          {!isLoggedIn || !token ? (
+            <div className="main-panel-wrapper">
+              <Routes>
+                <Route path="/" element={<Welcome />} />
+                <Route
+                  path="/register"
+                  element={
+                    <Register
                       setAlert={showAlert}
                       setContent={handleContent}
-                      setExpanded={setExpanded}
-                      isExpanded={isExpanded}
                     />
-                    
-                    {Array.isArray(notes) && notes.length > 0 ? (
-                      <>
-                        <div className="notes-container">
-                          {notes.map((noteItem, index) => (
-                            <React.Fragment key={index}>
-                              <Note
-                                id={noteItem.id}
-                                noteTitle={noteItem.noteTitle}
-                                description={noteItem.description}
-                                onEdit={editNote}
-                                onDelete={deleteNote}
-                                setContent={handleContent}
-                                onToggleChat={(id) =>
-                                  setVisibleChatForNoteId((prevId) =>
-                                    prevId === id ? null : id
-                                  )
-                                }
-                                isChatVisible={
-                                  visibleChatForNoteId === noteItem.id
-                                }
-                                toggleChat={() =>
-                                  setVisibleChatForNoteId((prevId) =>
-                                    prevId === noteItem.id ? null : noteItem.id
-                                  )
-                                }
-                              />
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      </>
-                    ) : (
-                      <div className="info-container">
-                        <p>No notes available</p>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-          <Footer />
+                  }
+                />
+                <Route
+                  path="/login"
+                  element={
+                    <Login
+                      setToken={setToken}
+                      setLogin={setLogin}
+                      setContent={handleContent}
+                      setAlert={showAlert}
+                    />
+                  }
+                />
+                <Route
+                  path="*"
+                  element={
+                    <RedirectHandler
+                      logout={logout}
+                      setLogin={setLogin}
+                      setToken={setToken}
+                      showAlert={showAlert}
+                    />
+                  }
+                />
+              </Routes>
+            </div>
+          ) : (
+            <div className="content">
+              {isEditing ? (
+                <EditNote
+                  note={editingStates.note}
+                  onUpdate={(updatedNote) => {
+                    setNotes((prev) =>
+                      prev.map((note) =>
+                        note.id === updatedNote.id
+                          ? { ...note, ...updatedNote }
+                          : note
+                      )
+                    );
+                    setEditingStates({ type: null, note: null });
+                    handleContent("home");
+                    window.scrollTo({ top: 0, behavior: "smooth" });
+                  }}
+                  setAlert={showAlert}
+                  setContent={handleContent}
+                  cancelAction={cancelAction}
+                />
+              ) : isDeleting ? (
+                <DeleteNote
+                  note={editingStates.note}
+                  onRemove={removeNote}
+                  setAlert={showAlert}
+                  cancelAction={cancelAction}
+                />
+              ) : (
+                <>
+                  <CreateArea
+                    onAdd={addNote}
+                    setAlert={showAlert}
+                    setContent={handleContent}
+                    setExpanded={setExpanded}
+                    isExpanded={isExpanded}
+                  />
+
+                  {Array.isArray(notes) && notes.length > 0 ? (
+                    <div className="notes-container">
+                      {notes.map((noteItem, index) => (
+                        <React.Fragment key={index}>
+                          <Note
+                            id={noteItem.id}
+                            noteTitle={noteItem.noteTitle}
+                            description={noteItem.description}
+                            onEdit={editNote}
+                            onDelete={deleteNote}
+                            setContent={handleContent}
+                            isChatVisible={
+                              visibleChatForNoteId === noteItem.id
+                            }
+                            toggleChat={() =>
+                              toggleChatForNote(noteItem.id)
+                            }
+                          />
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="info-container">
+                      <p>No notes available</p>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
         </div>
+
+        <Footer />
+      </div>
     </div>
   );
 }
