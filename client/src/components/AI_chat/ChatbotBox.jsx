@@ -43,8 +43,6 @@ function ChatbotBox({ onClose }) {
         throw new Error(data.error.message || "Something went wrong!");
       }
 
-      // const data = text ? JSON.parse(text) : {};
-
       // Clean and update chat history with bot's response
       const apiResponseText = data.candidates[0].content.parts[0].text
         .replace(/\*\*(.*?)\*\*/g, "$1")
