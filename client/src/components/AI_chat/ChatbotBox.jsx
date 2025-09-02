@@ -4,6 +4,7 @@ import ChatbotIcon from "./ChatbotIcon";
 import ChatForm from "./ChatForm";
 import "../../CSS-styles/chat-styles.css";
 import ChatMessage from "./ChatMessage";
+import CloseIcon from "@mui/icons-material/Close";
 
 function ChatbotBox({ onClose }) {
   const [chatHistory, setChatHistory] = useState([]);
@@ -96,7 +97,16 @@ function ChatbotBox({ onClose }) {
               setChatHistory={setChatHistory}
               generateBotResponse={generateBotResponse}
             />
+            <button onClick={onClose} className="chat-close-button">
+              <CloseIcon className="close-icon" />
+            </button>
           </div>
+          {/* <div className="container"> */}
+            {/* 🔘 Przycisk do otwierania/zamykania chatbota */}
+            {/* <button onClick={onClose} id="chatbot-toggler">
+              <CloseIcon className="close-icon" />  
+            </button> */}
+          {/* </div> */}
         </div>
       </div>
     </div>
