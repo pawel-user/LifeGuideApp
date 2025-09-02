@@ -5,9 +5,16 @@ import ChatForm from "./ChatForm";
 import "../../CSS-styles/chat-styles.css";
 import ChatMessage from "./ChatMessage";
 import CloseIcon from "@mui/icons-material/Close";
+import { coachInfo } from "../../coachInfo.js";
 
 function ChatbotBox({ onClose }) {
-  const [chatHistory, setChatHistory] = useState([]);
+  const [chatHistory, setChatHistory] = useState([
+    {
+      hideInChat: true,
+      role: "model",
+      text: coachInfo,
+    },
+  ]);
   const chatBodyRef = useRef();
 
   const generateBotResponse = async (history) => {
@@ -101,12 +108,6 @@ function ChatbotBox({ onClose }) {
               <CloseIcon className="close-icon" />
             </button>
           </div>
-          {/* <div className="container"> */}
-            {/* 🔘 Przycisk do otwierania/zamykania chatbota */}
-            {/* <button onClick={onClose} id="chatbot-toggler">
-              <CloseIcon className="close-icon" />  
-            </button> */}
-          {/* </div> */}
         </div>
       </div>
     </div>
