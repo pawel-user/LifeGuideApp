@@ -1,11 +1,29 @@
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
+import { isTokenExpired } from "../utils/token";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 export default function useAuth() {
   const [token, setTokenState] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const [isAuthInitialized, setIsAuthInitialized] = useState(false);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("token");
+    const storedRefreshToken = localStorage.getItem("refreshToken");
+
+    if (
+      typeof storedToken === "string" &&
+      typeof storedRefreshToken === "string"
+    ) {
+      setTokenState(storedToken);
+      setIsLoggedIn(true);
+    }
+
+    setIsAuthInitialized(true); // ✅ oznacz zakończenie inicjalizacji
+  }, []);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -21,8 +39,6 @@ export default function useAuth() {
   }, []);
 
   const login = (newToken, newRefreshToken) => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("refreshToken");
     if (
       typeof newToken === "string" &&
       typeof newRefreshToken === "string" &&
@@ -33,8 +49,6 @@ export default function useAuth() {
       localStorage.setItem("refreshToken", newRefreshToken);
       setTokenState(newToken);
       setIsLoggedIn(true);
-    } else {
-      if (!newToken || !newRefreshToken) return;
     }
   };
 
@@ -43,7 +57,7 @@ export default function useAuth() {
     localStorage.removeItem("refreshToken");
     setTokenState("");
     setIsLoggedIn(false);
-  
+
     if (typeof navigateTo === "function") {
       navigateTo("/");
     }
@@ -51,13 +65,14 @@ export default function useAuth() {
 
   const getValidToken = async () => {
     if (!token || typeof token !== "string" || token.trim() === "") {
-      console.warn("No token available — probably logged out");
+      // Nie loguj błędu jeśli token jeszcze się ładuje
       return null;
     }
-
+    
     try {
-      const decoded = jwtDecode(token);
-      const isExpired = decoded.exp * 1000 < Date.now();
+      // decoded może być użyte do pobierania danych użytkownika z tokena
+      // const decoded = jwtDecode(token);
+      const isExpired = isTokenExpired(token);
 
       if (!isExpired) return token;
 
@@ -78,7 +93,7 @@ export default function useAuth() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
-   
+
       if (!res.ok) {
         logout();
         throw new Error("Session expired. Please log in again.");
@@ -109,5 +124,6 @@ export default function useAuth() {
     isLoggedIn,
     setLogin: setIsLoggedIn,
     getValidToken,
+    isAuthInitialized,
   };
 }

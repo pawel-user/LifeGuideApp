@@ -3,15 +3,11 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../services/loggedUsers.js";
 import LogoutIcon from "@mui/icons-material/Logout";
+import useAuth from "../hooks/useAuth";
 
-export default function Logout({
-  setLogin,
-  setToken,
-  setAlert,
-  setContent,
-  setNotes
-}) {
+export default function Logout({ setAlert, setContent, setNotes }) {
   const navigate = useNavigate();
+  const { logout, setLogin } = useAuth();
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -22,17 +18,16 @@ export default function Logout({
         return;
       }
 
-      await logoutUser(token);
-
+      await logoutUser(token); 
+      
+      logout();
       setLogin(false);
-      setToken("");
       setNotes([]);
       setAlert("success", "Logout successful");
       setContent("start");
 
-      // 💾 Wyczyść pamięć
+      // 💾 Wyczyść lokalne dane
       localStorage.removeItem("notes");
-      localStorage.removeItem("token");
       localStorage.removeItem("userData");
       sessionStorage.clear();
 
@@ -45,10 +40,7 @@ export default function Logout({
 
   return (
     <h2>
-      <button
-        onClick={handleLogout}
-        className="logout-button"
-      >
+      <button onClick={handleLogout} className="logout-button">
         <LogoutIcon />
       </button>
     </h2>

@@ -1,20 +1,22 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import Logout from "./Logout";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHandshake } from "@fortawesome/free-solid-svg-icons";
 
-function Header({
-  isLoggedIn,
-  logout,
-  setToken,
-  setLogin,
-  setAlert,
-  setContent,
-  setNoteToEdit,
-  setNotes,
-  setIsDeleting
-}) {
+function Header(authProps) {
+  const {
+    isLoggedIn,
+    logout,
+    login,
+    setLogin,
+    setAlert,
+    setContent,
+    setNoteToEdit,
+    setNotes,
+    setIsDeleting,
+  } = authProps;
+
   const navigate = useNavigate();
 
   const handleReturnToHome = (e) => {
@@ -28,15 +30,16 @@ function Header({
   return (
     <header>
       <nav className="navbar">
-        <a className="navbar-brand" href="/" onClick={handleReturnToHome}>
+        <Link to="/" onClick={handleReturnToHome} className="navbar-brand">
           <FontAwesomeIcon className="icon" icon={faHandshake} />
           <span className="brand-text">Life Guide</span>
-        </a>
+        </Link>
+
         {isLoggedIn && (
           <div className="navbar-right">
             <Logout
+              logout={logout}
               setLogin={setLogin}
-              setToken={setToken}
               setAlert={setAlert}
               setContent={setContent}
               setNotes={setNotes}

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import Header from "./Header";
 import Footer from "./Footer";
@@ -19,24 +19,26 @@ import useFetchNotes from "../hooks/useFetchNotes";
 import useChatbot from "../hooks/useChatbot";
 import { usePostLoginEffect } from "../hooks/usePostLoginEffect";
 import RedirectHandler from "./RedirectHandler";
+import ChatbotBox from "./AI_chat/ChatbotBox";
 
 import "../CSS-styles/styles.css";
 
 function App() {
   const {
     token,
-    setToken,
     login,
     logout,
     isLoggedIn,
     setLogin,
     getValidToken,
+    isAuthInitialized,
   } = useAuth();
 
   const { alert, showAlert } = useAlerts();
   const { type: contentType, handleContent } = useContent();
 
   const [notes, setNotes] = useNotes(token, isLoggedIn, getValidToken, logout);
+  const [validToken, setValidToken] = useState(null);
 
   const [editingStates, setEditingStates] = useState({
     type: null,
@@ -44,8 +46,6 @@ function App() {
   });
 
   const [isExpanded, setExpanded] = useState(false);
-  // const [visibleChatForNoteId, setVisibleChatForNoteId] = useState(null);
-
   const isEditing = editingStates.type === "edit";
   const isDeleting = editingStates.type === "delete";
 
@@ -61,56 +61,66 @@ function App() {
   const { visibleChatForNoteId, toggleChatForNote } = useChatbot();
 
   useLayoutMargin(isExpanded);
+
+  // ✅ Wywołanie hooka wewnątrz komponentu
   useFetchNotes({ isLoggedIn, token, getValidToken, setNotes, showAlert });
   usePostLoginEffect({ isLoggedIn, token, setEditingStates });
 
-  // const toggleChatForNote = (id) => {
-  //   setVisibleChatForNoteId((prevId) => (prevId === id ? null : id));
-  // };
+  // 🔄 Odświeżanie tokena co 5 minut
+  useEffect(() => {
+    if (!isAuthInitialized) return;
+
+    const fetchToken = async () => {
+      const freshToken = await getValidToken();
+      setValidToken(freshToken);
+    };
+    fetchToken();
+
+    const interval = setInterval(fetchToken, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [getValidToken, isAuthInitialized]);
+
+  const authProps = {
+    isLoggedIn,
+    logout,
+    login,
+    setLogin,
+    setAlert: showAlert,
+    setContent: handleContent,
+    setNoteToEdit: (note) => setEditingStates({ type: "edit", note }),
+    setNotes,
+    setIsDeleting: (flag) =>
+      setEditingStates((prev) => ({
+        ...prev,
+        type: flag ? "delete" : null,
+      })),
+  };
 
   return (
     <div className="main-app-wrapper">
       <div className="app-container">
-        <Header
-          isLoggedIn={isLoggedIn}
-          logout={logout}
-          setToken={setToken}
-          setLogin={setLogin}
-          setAlert={showAlert}
-          setContent={handleContent}
-          setNoteToEdit={(note) => setEditingStates({ type: "edit", note })}
-          setNotes={setNotes}
-          setIsDeleting={(flag) =>
-            setEditingStates((prev) => ({
-              ...prev,
-              type: flag ? "delete" : null,
-            }))
-          }
-        />
+        <Header {...authProps} />
 
         <div className={`content-${contentType}`}>
           {alert.visible && (
             <div className={`alert alert-${alert.type}`}>{alert.message}</div>
           )}
 
-          {!isLoggedIn || !token ? (
+          {!isLoggedIn ? (
             <div className="main-panel-wrapper">
               <Routes>
                 <Route path="/" element={<Welcome />} />
                 <Route
                   path="/register"
                   element={
-                    <Register
-                      setAlert={showAlert}
-                      setContent={handleContent}
-                    />
+                    <Register setAlert={showAlert} setContent={handleContent} />
                   }
                 />
                 <Route
                   path="/login"
                   element={
                     <Login
-                      setToken={setToken}
+                      login={login}
                       setLogin={setLogin}
                       setContent={handleContent}
                       setAlert={showAlert}
@@ -123,7 +133,7 @@ function App() {
                     <RedirectHandler
                       logout={logout}
                       setLogin={setLogin}
-                      setToken={setToken}
+                      login={login}
                       showAlert={showAlert}
                     />
                   }
@@ -179,13 +189,17 @@ function App() {
                             onEdit={editNote}
                             onDelete={deleteNote}
                             setContent={handleContent}
-                            isChatVisible={
-                              visibleChatForNoteId === noteItem.id
-                            }
-                            toggleChat={() =>
-                              toggleChatForNote(noteItem.id)
-                            }
+                            isChatVisible={visibleChatForNoteId === noteItem.id}
+                            toggleChat={() => toggleChatForNote(noteItem.id)}
                           />
+                          {visibleChatForNoteId === noteItem.id &&
+                            validToken?.trim() && (
+                              <ChatbotBox
+                                onClose={() => toggleChatForNote(noteItem.id)}
+                                noteId={noteItem.id}
+                                token={validToken}
+                              />
+                            )}
                         </React.Fragment>
                       ))}
                     </div>

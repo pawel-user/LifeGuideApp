@@ -226,7 +226,7 @@
   display: flex;
   align-items: center;
   background: #fff;
-  border-radius: 32px;
+  border-radius: 16px;
   flex-grow: 1;
   outline: 1px solid #ffccbc;
   box-shadow: 0 0 8px rgba(230, 81, 0, 0.2);
@@ -240,9 +240,10 @@
   border: none;
   outline: none;
   width: 100%;
-  height: 47px;
-  padding: 0 17px;
+  height: 100px;
+  padding: 5px 17px;
   font-size: 0.95rem;
+  resize: none;
 }
 
 .chatbox-wrapper .chat-form button {
@@ -293,6 +294,30 @@
 }
 
 .chatbox-wrapper .chat-footer .close-icon {
+  font-size: 24px;
+  color: #fff3e0;
+}
+
+.chatbox-wrapper .chat-footer .chat-delete-button {
+  height: 40px;
+  width: 40px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  border-radius: 50%;
+  background: #e65100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.chatbox-wrapper .chat-footer .chat-delete-button:hover,
+.chatbox-wrapper .chat-footer .chat-delete-button:focus {
+  background: #bf360c;
+}
+
+.chatbox-wrapper .chat-footer .delete-icon {
   font-size: 24px;
   color: #fff3e0;
 }

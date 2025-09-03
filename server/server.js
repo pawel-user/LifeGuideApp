@@ -202,6 +202,66 @@ app.delete("/notes/:id", authenticateUser, async (req, res) => {
   }
 });
 
+app.get("/chat/:noteId", authenticateUser, async (req, res) => {
+  const { noteId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const result = await pool.query(
+      `SELECT sender, message, timestamp
+       FROM chat_messages
+       WHERE user_id = $1 AND note_id = $2
+       ORDER BY timestamp ASC`,
+      [userId, noteId]
+    );
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("Error fetching chat history:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.post("/chat/:noteId", authenticateUser, async (req, res) => {
+  const { noteId } = req.params;
+  const { sender, message } = req.body;
+  const userId = req.user.id;
+
+  if (!sender || !message) {
+    return res.status(400).send("Sender and message are required");
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO chat_messages (user_id, note_id, sender, message)
+       VALUES ($1, $2, $3, $4)`,
+      [userId, noteId, sender, message]
+    );
+
+    res.status(201).send("Message saved");
+  } catch (error) {
+    console.error("Error saving chat message:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
+app.delete("/chat/:noteId", authenticateUser, async (req, res) => {
+  const { noteId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    await pool.query(
+      `DELETE FROM chat_messages WHERE user_id = $1 AND note_id = $2`,
+      [userId, noteId]
+    );
+
+    res.status(200).json({ message: "Chat history deleted successfully." });
+  } catch (error) {
+    console.error("Error deleting chat history:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 app.post("/token", async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(401).send("No token provided");

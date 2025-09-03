@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { loginUser } from "../services/loggedUsers.js";
 import PropTypes from "prop-types";
 
-export default function Login({ setToken, setAlert, setContent }) {
+export default function Login({ login, setAlert, setContent }) {
   const [username, setUserName] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export default function Login({ setToken, setAlert, setContent }) {
       const { token, refreshToken } = await loginUser({ username, password }, setAlert);
 
       if (token && refreshToken) {
-        setToken(token, refreshToken);
+        login(token, refreshToken);
         setAlert("success", "Login Successful");
         setContent("home");
         navigate("/");
@@ -76,7 +76,7 @@ export default function Login({ setToken, setAlert, setContent }) {
 }
 
 Login.propTypes = {
-  setToken: PropTypes.func.isRequired,
+  login: PropTypes.func.isRequired,
   setAlert: PropTypes.func.isRequired,
   setContent: PropTypes.func.isRequired,
 };

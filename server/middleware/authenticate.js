@@ -8,6 +8,10 @@ const SECRET_KEY = process.env.SECRET_KEY;
 export const authenticateUser = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
+  if (process.env.NODE_ENV === "development") {
+    console.log("Odebrany token:", token);
+  }
+
   if (!token) return res.status(401).send("No token provided");
 
   try {
@@ -21,6 +25,6 @@ export const authenticateUser = (req, res, next) => {
     next();
   } catch (err) {
     console.error("Token error:", err.message);
-    res.status(401).send("Invalid or expired token");
+    return res.status(401).json({ error: "Invalid or missing token" });
   }
 };
