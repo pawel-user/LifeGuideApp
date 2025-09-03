@@ -262,6 +262,40 @@ app.delete("/chat/:noteId", authenticateUser, async (req, res) => {
   }
 });
 
+app.get("/coach-info/:noteId", authenticateUser, async (req, res) => {
+  const { noteId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const noteResult = await pool.query(
+      `SELECT notetitle, description FROM notes WHERE id = $1 AND userid = $2`,
+      [noteId, userId]
+    );
+
+    if (noteResult.rows.length === 0) {
+      return res.status(404).send("Note not found or unauthorized");
+    }
+
+    const { notetitle, description } = noteResult.rows[0];
+
+    const coachInfo = `
+Introduction:
+I'm your helpful Coach, here to assist you with anything you need related to your life problems.
+
+User ID: ${userId}
+Problem Title: ${notetitle}
+Description: ${description}
+
+Based on this, let's explore possible solutions together.
+`;
+
+    res.status(200).json({ coachInfo });
+  } catch (error) {
+    console.error("Error generating coach info:", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 app.post("/token", async (req, res) => {
   const { refreshToken } = req.body;
   if (!refreshToken) return res.status(401).send("No token provided");
@@ -296,7 +330,9 @@ app.post("/token", async (req, res) => {
 
 app.post("/logout", authenticateUser, async (req, res) => {
   try {
-    await pool.query("UPDATE users SET refresh_token = NULL WHERE id = $1", [req.user.id]);
+    await pool.query("UPDATE users SET refresh_token = NULL WHERE id = $1", [
+      req.user.id,
+    ]);
     res.status(200).send({ message: "User logged out successfully." });
   } catch (error) {
     console.error("Logout error:", error);

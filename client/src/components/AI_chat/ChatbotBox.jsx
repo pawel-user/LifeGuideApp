@@ -8,22 +8,65 @@ import ConfirmModal from "./ConfirmModal";
 import FeedbackModal from "./FeedbackModal";
 import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
-import { coachInfo } from "../../coachInfo.js";
 
 function ChatbotBox({ onClose, noteId, token }) {
-  const [chatHistory, setChatHistory] = useState([
-    {
-      hideInChat: true,
-      role: "model",
-      text: coachInfo,
-    },
-  ]);
+  const [chatHistory, setChatHistory] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackIcon, setFeedbackIcon] = useState("");
 
   const chatBodyRef = useRef();
+
+  const fetchCoachInfo = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/coach-info/${noteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to fetch coach info");
+
+      const data = await res.json();
+      return data.coachInfo;
+    } catch (err) {
+      console.error("Error fetching coach info:", err);
+      return "I'm your helpful Coach, here to assist you.";
+    }
+  };
+
+  const fetchChatHistory = async () => {
+    try {
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/chat/${noteId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText);
+      }
+
+      const data = await res.json();
+
+      const formatted = data.map((msg) => ({
+        role: msg.sender === "user" ? "user" : "model",
+        text: msg.message,
+      }));
+
+      setChatHistory((prev) => [...prev, ...formatted]);
+    } catch (err) {
+      console.error("Błąd ładowania historii czatu:", err);
+    }
+  };
 
   const handleDeleteHistory = async () => {
     try {
@@ -38,11 +81,12 @@ function ChatbotBox({ onClose, noteId, token }) {
       );
 
       if (res.ok) {
+        const coachInfoText = await fetchCoachInfo();
         setChatHistory([
           {
             hideInChat: true,
             role: "model",
-            text: coachInfo,
+            text: coachInfoText,
           },
         ]);
         setFeedbackMessage("✅ Chat history deleted successfully.");
@@ -82,12 +126,11 @@ function ChatbotBox({ onClose, noteId, token }) {
         body: JSON.stringify({ sender, message }),
       });
     } catch (err) {
-      console.error("Błąd zapisu wiadomości:", err);
+      console.error("Message writing error:", err);
     }
   };
 
   const generateBotResponse = async (history) => {
-    // Helper function to update chat history
     const updateHistory = (text, isError = false) => {
       setChatHistory((prev) => [
         ...prev.filter((msg) => msg.text !== "Thinking..."),
@@ -95,6 +138,7 @@ function ChatbotBox({ onClose, noteId, token }) {
       ]);
       saveMessageToDB("ai", text);
     };
+
     const formattedHistory = history.map(({ role, text }) => ({
       role,
       parts: [{ text }],
@@ -110,9 +154,7 @@ function ChatbotBox({ onClose, noteId, token }) {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_GEMINI_API_URL}?key=${
-          import.meta.env.VITE_API_KEY
-        }`,
+        `${import.meta.env.VITE_GEMINI_API_URL}?key=${import.meta.env.VITE_API_KEY}`,
         requestOptions
       );
       const data = await response.json();
@@ -121,7 +163,6 @@ function ChatbotBox({ onClose, noteId, token }) {
         throw new Error(data.error.message || "Something went wrong!");
       }
 
-      // Clean and update chat history with bot's response
       const apiResponseText = data.candidates[0].content.parts[0].text
         .replace(/\*\*(.*?)\*\*/g, "$1")
         .trim();
@@ -131,46 +172,51 @@ function ChatbotBox({ onClose, noteId, token }) {
     }
   };
 
+  // useEffect(() => {
+  //   if (!token) {
+  //     console.warn("No token — unauthorised user");
+  //     return;
+  //   }
+
+  //   const initializeChat = async () => {
+  //     const coachInfoText = await fetchCoachInfo();
+
+  //     setChatHistory([
+  //       {
+  //         hideInChat: true,
+  //         role: "model",
+  //         text: coachInfoText,
+  //       },
+  //     ]);
+
+  //     await fetchChatHistory();
+  //   };
+
+  //   initializeChat();
+  // }, [noteId, token]);
+
+  const startChat = async () => {
+    const coachInfoText = await fetchCoachInfo();
+    setChatHistory([
+      {
+        hideInChat: true,
+        role: "model",
+        text: coachInfoText,
+      },
+    ]);
+    await fetchChatHistory();
+  };
+
   useEffect(() => {
     if (!token) {
-      console.warn("Brak tokena — użytkownik nieautoryzowany");
+      console.warn("No token — unauthorised user");
       return;
     }
-
-    async function fetchChatHistory() {
-      try {
-        const res = await fetch(
-          `${import.meta.env.VITE_API_URL}/chat/${noteId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(errorText);
-        }
-
-        const data = await res.json();
-
-        const formatted = data.map((msg) => ({
-          role: msg.sender === "user" ? "user" : "model",
-          text: msg.message,
-        }));
-
-        setChatHistory((prev) => [...prev, ...formatted]);
-      } catch (err) {
-        console.error("Błąd ładowania historii czatu:", err);
-      }
-    }
-
-    fetchChatHistory();
+    startChat();
   }, [noteId, token]);
+  
 
   useEffect(() => {
-    // Auto-scroll whenever chat history updates
     chatBodyRef.current.scrollTo({
       top: chatBodyRef.current.scrollHeight,
       behavior: "smooth",
@@ -181,7 +227,6 @@ function ChatbotBox({ onClose, noteId, token }) {
     <div className="chatbox-wrapper">
       <div className={"container show-chatbot"}>
         <div className="chatbot-popup">
-          {/* Chatbot Header */}
           <div className="chat-header">
             <div className="header-info">
               <ChatbotIcon />
@@ -191,7 +236,7 @@ function ChatbotBox({ onClose, noteId, token }) {
               </button>
             </div>
           </div>
-          {/* Chatbot Body */}
+
           <div ref={chatBodyRef} className="chat-body">
             <div className="message bot-message">
               <ChatbotIcon />
@@ -199,13 +244,11 @@ function ChatbotBox({ onClose, noteId, token }) {
                 Hey there 👋 <br /> How can I help you today?
               </p>
             </div>
-            {/* Render the chat history dynamically */}
             {chatHistory.map((chat, index) => (
               <ChatMessage key={index} chat={chat} />
             ))}
           </div>
 
-          {/* Chatbot Footer */}
           <div className="chat-footer">
             <ChatForm
               chatHistory={chatHistory}
@@ -213,7 +256,6 @@ function ChatbotBox({ onClose, noteId, token }) {
               generateBotResponse={generateBotResponse}
               saveMessageToDB={saveMessageToDB}
             />
-            {/* Delete chat history button */}
             <button
               onClick={() => setShowConfirm(true)}
               className="chat-delete-button"
@@ -230,7 +272,7 @@ function ChatbotBox({ onClose, noteId, token }) {
               <CloseIcon className="close-icon" />
             </button>
           </div>
-          {/* 🔔 MODAL POTWIERDZENIA */}
+
           {showConfirm && (
             <ConfirmModal
               message="Are you sure you want to delete the entire chat history?"
