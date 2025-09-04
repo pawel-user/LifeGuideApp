@@ -11,19 +11,20 @@ export default function useAuth() {
   const [isAuthInitialized, setIsAuthInitialized] = useState(false);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedRefreshToken = localStorage.getItem("refreshToken");
+    if (!isAuthInitialized) return;
 
-    if (
-      typeof storedToken === "string" &&
-      typeof storedRefreshToken === "string"
-    ) {
-      setTokenState(storedToken);
-      setIsLoggedIn(true);
-    }
+    const refreshTokenPeriodically = async () => {
+      const freshToken = await getValidToken();
+      if (freshToken) {
+        setTokenState(freshToken); 
+      }
+    };
 
-    setIsAuthInitialized(true); // ✅ oznacz zakończenie inicjalizacji
-  }, []);
+    refreshTokenPeriodically();
+
+    const interval = setInterval(refreshTokenPeriodically, 5 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, [isAuthInitialized]);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("token");
@@ -36,6 +37,7 @@ export default function useAuth() {
       setTokenState(storedToken);
       setIsLoggedIn(true);
     }
+    setIsAuthInitialized(true);
   }, []);
 
   const login = (newToken, newRefreshToken) => {
@@ -68,7 +70,7 @@ export default function useAuth() {
       // Nie loguj błędu jeśli token jeszcze się ładuje
       return null;
     }
-    
+
     try {
       // decoded może być użyte do pobierania danych użytkownika z tokena
       // const decoded = jwtDecode(token);

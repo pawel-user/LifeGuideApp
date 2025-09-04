@@ -4,7 +4,6 @@ import EditNoteIcon from "@mui/icons-material/EditNote";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ModeCommentIcon from "@mui/icons-material/ModeComment";
 import CloseIcon from "@mui/icons-material/Close";
-import ChatbotBox from "./AI_chat/ChatbotBox";
 
 function Note({
   id,
@@ -64,8 +63,6 @@ function Note({
           </button>
         </Link>
       </div>
-
-      {isChatVisible && <ChatbotBox onClose={toggleChat} />}
     </>
   );
 }

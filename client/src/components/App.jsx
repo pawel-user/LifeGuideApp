@@ -38,7 +38,6 @@ function App() {
   const { type: contentType, handleContent } = useContent();
 
   const [notes, setNotes] = useNotes(token, isLoggedIn, getValidToken, logout);
-  const [validToken, setValidToken] = useState(null);
 
   const [editingStates, setEditingStates] = useState({
     type: null,
@@ -65,20 +64,6 @@ function App() {
   // ✅ Wywołanie hooka wewnątrz komponentu
   useFetchNotes({ isLoggedIn, token, getValidToken, setNotes, showAlert });
   usePostLoginEffect({ isLoggedIn, token, setEditingStates });
-
-  // 🔄 Odświeżanie tokena co 5 minut
-  useEffect(() => {
-    if (!isAuthInitialized) return;
-
-    const fetchToken = async () => {
-      const freshToken = await getValidToken();
-      setValidToken(freshToken);
-    };
-    fetchToken();
-
-    const interval = setInterval(fetchToken, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [getValidToken, isAuthInitialized]);
 
   const authProps = {
     isLoggedIn,
@@ -192,14 +177,26 @@ function App() {
                             isChatVisible={visibleChatForNoteId === noteItem.id}
                             toggleChat={() => toggleChatForNote(noteItem.id)}
                           />
-                          {visibleChatForNoteId === noteItem.id &&
-                            validToken?.trim() && (
+                          <>
+                            {/* {isAuthInitialized &&
+                            visibleChatForNoteId === noteItem.id &&
+                            typeof token === "string" &&
+                            token.trim().length > 0 &&
+                            typeof noteItem.id === "number" ? (
                               <ChatbotBox
                                 onClose={() => toggleChatForNote(noteItem.id)}
                                 noteId={noteItem.id}
-                                token={validToken}
+                                token={token}
+                              />
+                            ) : null} */}
+                            {visibleChatForNoteId === noteItem.id && (
+                              <ChatbotBox
+                                onClose={() => toggleChatForNote(noteItem.id)}
+                                noteId={noteItem.id}
+                                token={token}
                               />
                             )}
+                          </>
                         </React.Fragment>
                       ))}
                     </div>

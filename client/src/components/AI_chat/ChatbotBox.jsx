@@ -10,13 +10,37 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 function ChatbotBox({ onClose, noteId, token }) {
+  // 🛡️ Zabezpieczenie przed renderem z niegotowymi danymi
+  if (
+    !token ||
+    typeof token !== "string" ||
+    token.trim() === "" ||
+    typeof noteId !== "number"
+  ) {
+    console.warn("⏳ ChatbotBox has not been loaded — no token or noteId");
+    return null;
+  }
+
   const [chatHistory, setChatHistory] = useState([]);
   const [showConfirm, setShowConfirm] = useState(false);
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [feedbackIcon, setFeedbackIcon] = useState("");
+  const [hasInitializedChat, setHasInitializedChat] = useState(false);
 
   const chatBodyRef = useRef();
+
+  const handleUnauthorized = (status) => {
+    if (status === 401) {
+      console.warn("🔒 Session expired");
+      setFeedbackMessage("🔒 Your session has expired. Please log in again..");
+      setFeedbackIcon("🔒");
+      setShowFeedbackModal(true);
+      setTimeout(() => setShowFeedbackModal(false), 3000);
+      return true;
+    }
+    return false;
+  };
 
   const fetchCoachInfo = async () => {
     try {
@@ -28,6 +52,8 @@ function ChatbotBox({ onClose, noteId, token }) {
           },
         }
       );
+
+      if (handleUnauthorized(res.status)) return "Session expired.";
 
       if (!res.ok) throw new Error("Failed to fetch coach info");
 
@@ -50,6 +76,8 @@ function ChatbotBox({ onClose, noteId, token }) {
         }
       );
 
+      if (handleUnauthorized(res.status)) return;
+
       if (!res.ok) {
         const errorText = await res.text();
         throw new Error(errorText);
@@ -64,7 +92,7 @@ function ChatbotBox({ onClose, noteId, token }) {
 
       setChatHistory((prev) => [...prev, ...formatted]);
     } catch (err) {
-      console.error("Błąd ładowania historii czatu:", err);
+      console.error("Error loading chat history:", err);
     }
   };
 
@@ -79,6 +107,8 @@ function ChatbotBox({ onClose, noteId, token }) {
           },
         }
       );
+
+      if (handleUnauthorized(res.status)) return;
 
       if (res.ok) {
         const coachInfoText = await fetchCoachInfo();
@@ -154,7 +184,9 @@ function ChatbotBox({ onClose, noteId, token }) {
 
     try {
       const response = await fetch(
-        `${import.meta.env.VITE_GEMINI_API_URL}?key=${import.meta.env.VITE_API_KEY}`,
+        `${import.meta.env.VITE_GEMINI_API_URL}?key=${
+          import.meta.env.VITE_API_KEY
+        }`,
         requestOptions
       );
       const data = await response.json();
@@ -172,29 +204,6 @@ function ChatbotBox({ onClose, noteId, token }) {
     }
   };
 
-  // useEffect(() => {
-  //   if (!token) {
-  //     console.warn("No token — unauthorised user");
-  //     return;
-  //   }
-
-  //   const initializeChat = async () => {
-  //     const coachInfoText = await fetchCoachInfo();
-
-  //     setChatHistory([
-  //       {
-  //         hideInChat: true,
-  //         role: "model",
-  //         text: coachInfoText,
-  //       },
-  //     ]);
-
-  //     await fetchChatHistory();
-  //   };
-
-  //   initializeChat();
-  // }, [noteId, token]);
-
   const startChat = async () => {
     const coachInfoText = await fetchCoachInfo();
     setChatHistory([
@@ -208,13 +217,15 @@ function ChatbotBox({ onClose, noteId, token }) {
   };
 
   useEffect(() => {
-    if (!token) {
-      console.warn("No token — unauthorised user");
-      return;
-    }
-    startChat();
-  }, [noteId, token]);
-  
+    if (hasInitializedChat) return;
+
+    const init = async () => {
+      await startChat();
+      setHasInitializedChat(true);
+    };
+
+    init();
+  }, [token, noteId, hasInitializedChat]);
 
   useEffect(() => {
     chatBodyRef.current.scrollTo({
@@ -241,7 +252,7 @@ function ChatbotBox({ onClose, noteId, token }) {
             <div className="message bot-message">
               <ChatbotIcon />
               <p className="message-text">
-                Hey there 👋 <br /> How can I help you today?
+                Welcome 👋 <br /> I'm your personal Coach. How can I help you today?
               </p>
             </div>
             {chatHistory.map((chat, index) => (
