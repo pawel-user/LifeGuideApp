@@ -10,7 +10,6 @@ import CloseIcon from "@mui/icons-material/Close";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 
 function ChatbotBox({ onClose, noteId, token }) {
-  // 🛡️ Zabezpieczenie przed renderem z niegotowymi danymi
   if (
     !token ||
     typeof token !== "string" ||

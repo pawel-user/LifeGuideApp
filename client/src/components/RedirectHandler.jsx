@@ -1,15 +1,16 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-function RedirectHandler({ logout, setLogin, setToken, showAlert }) {
+function RedirectHandler({ logout, setLogin, setToken, setContent }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    logout(navigate); // ⬅️ przekierowanie po wylogowaniu
+    logout(navigate);
     setLogin(false);
     setToken(null);
-  }, [logout, setLogin, setToken, navigate]);
-
+    setContent("start");
+  }, [logout, setLogin, setToken, setContent, navigate]);
+  
   return null;
 }
 

@@ -23,7 +23,7 @@ export default function Login({ login, setAlert, setContent }) {
         setAlert("error", "Login failed: missing token(s)");
       }
     } catch {
-      // Obsługa błędów już w loginUser()
+      // Error handling already in loginUser()
     }
   };
 

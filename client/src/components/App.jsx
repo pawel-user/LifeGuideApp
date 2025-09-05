@@ -24,15 +24,8 @@ import ChatbotBox from "./AI_chat/ChatbotBox";
 import "../CSS-styles/styles.css";
 
 function App() {
-  const {
-    token,
-    login,
-    logout,
-    isLoggedIn,
-    setLogin,
-    getValidToken,
-    isAuthInitialized,
-  } = useAuth();
+  const { token, login, logout, isLoggedIn, setLogin, getValidToken } =
+    useAuth();
 
   const { alert, showAlert } = useAlerts();
   const { type: contentType, handleContent } = useContent();
@@ -61,7 +54,6 @@ function App() {
 
   useLayoutMargin(isExpanded);
 
-  // ✅ Wywołanie hooka wewnątrz komponentu
   useFetchNotes({ isLoggedIn, token, getValidToken, setNotes, showAlert });
   usePostLoginEffect({ isLoggedIn, token, setEditingStates });
 
@@ -118,8 +110,8 @@ function App() {
                     <RedirectHandler
                       logout={logout}
                       setLogin={setLogin}
-                      login={login}
-                      showAlert={showAlert}
+                      setToken={() => null}
+                      setContent={handleContent}
                     />
                   }
                 />
@@ -178,17 +170,6 @@ function App() {
                             toggleChat={() => toggleChatForNote(noteItem.id)}
                           />
                           <>
-                            {/* {isAuthInitialized &&
-                            visibleChatForNoteId === noteItem.id &&
-                            typeof token === "string" &&
-                            token.trim().length > 0 &&
-                            typeof noteItem.id === "number" ? (
-                              <ChatbotBox
-                                onClose={() => toggleChatForNote(noteItem.id)}
-                                noteId={noteItem.id}
-                                token={token}
-                              />
-                            ) : null} */}
                             {visibleChatForNoteId === noteItem.id && (
                               <ChatbotBox
                                 onClose={() => toggleChatForNote(noteItem.id)}

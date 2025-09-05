@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -36,7 +36,6 @@ function Note({
         <h1>{noteTitle}</h1>
         <p>{description}</p>
 
-        {/* 🔘 Przycisk do otwierania/zamykania chatbota */}
         <button onClick={toggleChat} id="chatbot-toggler">
           <span className="material-symbols-rounded">
             {isChatVisible ? <CloseIcon /> : <ModeCommentIcon />}
