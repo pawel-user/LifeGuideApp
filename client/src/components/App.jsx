@@ -86,7 +86,7 @@ function App() {
           {!isLoggedIn ? (
             <div className="main-panel-wrapper">
               <Routes>
-                <Route path="/" element={<Welcome />} />
+              <Route path="/" element={<Welcome showAlert={showAlert} />} />
                 <Route
                   path="/register"
                   element={

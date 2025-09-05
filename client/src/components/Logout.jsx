@@ -1,11 +1,13 @@
 // components/Logout.jsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { logoutUser } from "../services/loggedUsers.js";
 import LogoutIcon from "@mui/icons-material/Logout";
 import useAuth from "../hooks/useAuth";
 
-export default function Logout({ setAlert, setContent, setNotes }) {
+export default function Logout({ setNotes }) {
   const { logout, setLogin } = useAuth();
+  const navigate = useNavigate();
 
   const handleLogout = async (e) => {
     e.preventDefault();
@@ -16,22 +18,20 @@ export default function Logout({ setAlert, setContent, setNotes }) {
         return;
       }
 
-      await logoutUser(token); 
-      
+      await logoutUser(token);
+
       logout();
       setLogin(false);
       setNotes([]);
-      setAlert("success", "Logout successful");
-      setContent("start");
-
       localStorage.removeItem("notes");
       localStorage.removeItem("userData");
       sessionStorage.clear();
 
-      window.location.href = "/";
+      // ✅ Redirect to Welcome with logout success flag
+      window.location.href = "/?logoutSuccess=true";
     } catch (error) {
       console.error("Error during logout:", error);
-      setAlert("error", "Logout failed. Please try again.");
+      navigate("/", { state: { logoutSuccess: false } });
     }
   };
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode";
 import { isTokenExpired } from "../utils/token";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";

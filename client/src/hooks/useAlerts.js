@@ -12,13 +12,15 @@ export default function useAlerts() {
 
   useEffect(() => {
     if (alert.visible) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         if (mounted.current) {
           setAlert((prev) => ({ ...prev, visible: false }));
         }
       }, 2000);
+
+      return () => clearTimeout(timer);
     }
-  }, [alert]);
+  }, [alert.visible]);
 
   const showAlert = (type, message) => {
     setAlert({ type, message, visible: true });
